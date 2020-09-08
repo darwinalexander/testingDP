@@ -90,10 +90,18 @@
  
  ## Nuevas modificacioens
  
+<<<<<<< HEAD
  1+2
  
  3+5
  
  5+5
  # DP
+=======
+ 
+ 
+ ##Wincho pelotas
+ 
+1+1
+>>>>>>> 6f173b9b99fb2a11baeeb1e9a4909c4ba71e9166
   
