@@ -1,9 +1,23 @@
 # -*- coding: utf-8 -*-
 """Módulo de datos compartido: carga el inventario del Parque y de la Avenida,
 asigna veredictos, URLs y estadísticos. Usado por los generadores docx y pdf."""
-import os, openpyxl
+import os, glob, openpyxl
 
 ASSETS = os.path.join(os.path.dirname(__file__), "..", "assets")
+# Ortofoto / imagen aérea de fondo (opcional). Coloca el archivo como
+# assets/ortofoto.jpg (o .png) y, si conoces las esquinas, assets/ortofoto_bounds.txt
+# con: min_lon,min_lat,max_lon,max_lat  (WGS84). Si no hay bounds, se usa el recuadro
+# calculado a partir de las coordenadas de los árboles.
+_orto = sorted(glob.glob(os.path.join(ASSETS, "ortofoto.*")))
+_orto = [f for f in _orto if not f.endswith(".txt")]
+ORTOFOTO = _orto[0] if _orto else None
+_bounds_file = os.path.join(ASSETS, "ortofoto_bounds.txt")
+ORTOFOTO_BOUNDS = None
+if os.path.exists(_bounds_file):
+    with open(_bounds_file) as fh:
+        vals = [float(x) for x in fh.read().replace("\n", ",").split(",") if x.strip()]
+        if len(vals) == 4:
+            ORTOFOTO_BOUNDS = vals  # min_lon,min_lat,max_lon,max_lat
 XLSX_PARQUE = os.path.join(ASSETS, "Reporte_Arboles_Parque.xlsx")
 XLSX_AV = os.path.join(ASSETS, "Reporte_Arboles_Avenida.xlsx")
 LOGO_UNL = os.path.join(ASSETS, "LOGO_UNL.png")
