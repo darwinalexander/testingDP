@@ -1,407 +1,248 @@
 # -*- coding: utf-8 -*-
-"""Genera el Informe Técnico del Arbolado Urbano del Parque Central de Saraguro
-y el Oficio de respuesta (formato Word)."""
-import openpyxl
+"""Genera el Informe Técnico en Word (python-docx)."""
+import os
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.enum.section import WD_ORIENT
+from docx.enum.section import WD_ORIENT, WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
+import _data as D
 
-XLSX = "/root/.claude/uploads/4220178d-38bf-5cec-aaf2-15ce148fe2a2/6d02b559-Reporte__rboles_20260711__GAD_de_Saraguro.xlsx"
-OUT_DOCX = "/home/user/testingDP/Informe_Tecnico_Arbolado_Parque_Central_Saraguro.docx"
+OUT = os.path.join(os.path.dirname(__file__), "..", "Informe_Tecnico_Arbolado_Parque_Central_Saraguro.docx")
+VERDE=RGBColor(0x1B,0x5E,0x20); VERDE_H="1B5E20"; GRIS=RGBColor(0x42,0x42,0x42)
+ROJO=RGBColor(0xB7,0x1C,0x1C); NARANJA=RGBColor(0xE6,0x5A,0x00); AZUL=RGBColor(0x0D,0x47,0xA1)
+ROJO_F="F4C7C3"; NAR_F="FCE5CD"; VER_F="D9EAD3"; PH_F="F2F2F2"
+CATF={"DERRIBO":ROJO_F,"CONSERVAR-INT":NAR_F,"CONSERVAR":VER_F}
+RISKC={"Alto":ROJO,"Medio":NARANJA,"Bajo":VERDE}
+CAT=D.CAT_LABEL; fnum=D.fnum
 
-# ---------- Colores institucionales ----------
-VERDE = RGBColor(0x1B, 0x5E, 0x20)
-VERDE_CLARO = "C8E6C9"
-GRIS = RGBColor(0x42, 0x42, 0x42)
-ROJO = RGBColor(0xB7, 0x1C, 0x1C)
-NARANJA = RGBColor(0xE6, 0x5A, 0x00)
-AZUL = RGBColor(0x0D, 0x47, 0xA1)
-HDR_FILL = "1B5E20"
-ROJO_FILL = "F4C7C3"
-NARANJA_FILL = "FCE5CD"
-VERDE_FILL = "D9EAD3"
+doc=Document()
+st=doc.styles["Normal"]; st.font.name="Calibri"; st.font.size=Pt(10.5)
+sec=doc.sections[0]
+sec.top_margin=Cm(2); sec.bottom_margin=Cm(2); sec.left_margin=Cm(2.2); sec.right_margin=Cm(2.2)
 
-# ---------- Cargar datos ----------
-wb = openpyxl.load_workbook(XLSX, data_only=True)
-ws = wb["Reporte"]
-headers = {c: ws.cell(row=1, column=c).value for c in range(1, ws.max_column + 1)}
-# indice por nombre de encabezado (primera aparicion)
-def col(name):
-    for c, h in headers.items():
-        if h == name:
-            return c
-    return None
+def set_bg(cell,hexc):
+    tcPr=cell._tc.get_or_add_tcPr(); shd=OxmlElement("w:shd")
+    shd.set(qn("w:val"),"clear"); shd.set(qn("w:fill"),hexc); tcPr.append(shd)
+def ctext(cell,text,bold=False,color=None,size=9,align="left",white=False):
+    cell.text=""; p=cell.paragraphs[0]
+    p.alignment={"left":WD_ALIGN_PARAGRAPH.LEFT,"center":WD_ALIGN_PARAGRAPH.CENTER,"right":WD_ALIGN_PARAGRAPH.RIGHT}[align]
+    r=p.add_run(str(text)); r.bold=bold; r.font.size=Pt(size)
+    if white: r.font.color.rgb=RGBColor(0xFF,0xFF,0xFF)
+    elif color: r.font.color.rgb=color
+def H(text,level=1,color=VERDE):
+    h=doc.add_heading(level=level); r=h.add_run(text); r.font.color.rgb=color
+    r.font.size=Pt(15 if level==1 else 12.5); return h
+def P(text,size=10.5,bold=False,italic=False,align="justify",color=None,after=6):
+    p=doc.add_paragraph()
+    p.alignment={"justify":WD_ALIGN_PARAGRAPH.JUSTIFY,"left":WD_ALIGN_PARAGRAPH.LEFT,"center":WD_ALIGN_PARAGRAPH.CENTER,"right":WD_ALIGN_PARAGRAPH.RIGHT}[align]
+    r=p.add_run(text); r.bold=bold; r.italic=italic; r.font.size=Pt(size)
+    if color: r.font.color.rgb=color
+    p.paragraph_format.space_after=Pt(after); return p
+def bullet(text,size=10.5):
+    p=doc.add_paragraph(style="List Bullet"); r=p.add_run(text); r.font.size=Pt(size); return p
+def hdr_row(table,labels):
+    for i,lab in enumerate(labels):
+        ctext(table.rows[0].cells[i],lab,bold=True,white=True,size=8.5,align="center"); set_bg(table.rows[0].cells[i],VERDE_H)
+def photo_strip(labels,height=2.9):
+    t=doc.add_table(rows=1,cols=len(labels)); t.alignment=WD_TABLE_ALIGNMENT.CENTER
+    t.rows[0].height=Cm(height)
+    for i,lab in enumerate(labels):
+        c=t.rows[0].cells[i]; set_bg(c,PH_F); c.width=Cm(17.0/len(labels))
+        c.text=""; p=c.paragraphs[0]; p.alignment=WD_ALIGN_PARAGRAPH.CENTER
+        r=p.add_run("\n[ %s ]\n(insertar foto)\n"%lab); r.font.size=Pt(8.5); r.font.color.rgb=GRIS; r.italic=True
+    return t
+def url_par(t):
+    p=doc.add_paragraph(); r=p.add_run("Ficha del árbol: "); r.bold=True; r.font.size=Pt(8.5)
+    r2=p.add_run(t["url"]); r2.font.size=Pt(8.5); r2.font.color.rgb=AZUL
+    p.paragraph_format.space_after=Pt(3); return p
 
-trees = []
-for r in range(2, ws.max_row + 1):
-    def g(name):
-        c = col(name)
-        return ws.cell(row=r, column=c).value if c else None
-    # Recomendaciones se detectan por celda no vacia en su columna
-    def rec(name):
-        c = col(name)
-        v = ws.cell(row=r, column=c).value if c else None
-        return bool(v and str(v).strip())
-    trees.append({
-        "row": r,
-        "id": "A%02d" % (r - 1),
-        "codigo": g("Código"),
-        "especie": g("Especie"),
-        "familia": g("Familia"),
-        "comun": g("Nombre Común"),
-        "ref": (str(g("Comentario")) if g("Comentario") else ""),
-        "lon": g("Longitud"), "lat": g("Latitud"),
-        "cf": g("Circunferencia de fuste"), "d": g("Diámetro"),
-        "ht": g("Altura total"), "hc": g("Altura comercial"),
-        "copaNS": g("Tam. copa (NS)"), "copaEW": g("Tam. copa (EW)"),
-        "follaje": g("Follaje"),
-        "madurez": g("Estado de maduréz"),
-        "rectitud": g("Rectitud de fuste"),
-        "espacio": g("Espacio de crecimiento"),
-        "riesgo": g("Riesgo total"), "valriesgo": g("Valor Riesgo total"),
-        "raiz": g("Raíz"), "fuste_est": g("Fuste"),
-        "caida": g("Caida"),
-        "afec_constr": g("Afectación a construcciones"),
-        "afec_circ": g("Inteferencia con la circulación"),
-        "afec_raiz": g("Daño a infraestructura por raíces"),
-        "rec_poda": rec("Poda"),
-        "rec_derribo": rec("Derribo"),
-        "rec_fertil": rec("Fertilización"),
-        "rec_epifitas": rec("Control de plantas epífitas o parásitas"),
-        "rec_mecanicos": rec("Tratamiento de daños mecánicos"),
-        "rec_objetos": rec("Eliminación de objetos extraños en tallo y ramas"),
-        "rec_resiembra": rec("Resiembra"),
-    })
-
-# ---------- Veredictos (análisis del arboricultor) ----------
-# categoria: "DERRIBO" / "CONSERVAR-INT" / "CONSERVAR"
-VER = {
-2:("CONSERVAR-INT","Riesgo total alto asociado a fuste inclinado y daños mecánicos (heridas, ramas quebradas, poda inadecuada), no a inestabilidad de anclaje; caída Media. Ejemplar pequeño (D=6,3 cm; 3,2 m). Poda de reequilibrio, tratamiento de heridas y manejo de epífitas."),
-3:("CONSERVAR","Buen estado estructural (fuste, corteza y hojas buenos); riesgo y caída bajos. Retirar cuerdas del fuste y poda ligera de formación."),
-4:("CONSERVAR-INT","Riesgo medio por fuste torcido, copa irregular y cima mala; caída Media. Especie nativa de valor ornamental. Poda de saneamiento y formación; tratar el descortezamiento."),
-5:("CONSERVAR-INT","Condición fitosanitaria deficiente (hongos, exudados, pústulas, pudrición de ramas, ápice muerto), pero riesgo de CAÍDA BAJO por porte moderado (9,1 m) y raíz buena. Poda sanitaria, tratamiento fungicida, manejo de epífitas y monitoreo."),
-6:("CONSERVAR-INT","Riesgo alto por afección foliar y de cima (hojas y cima malas, ápice muerto) y fuste inclinado; caída Media. Árbol joven-pequeño (D=19,7 cm; 7,4 m), recuperable. Poda sanitaria, fertilización y tratamiento; monitorear evolución."),
-7:("DERRIBO","Único ejemplar con riesgo de CAÍDA ALTO y recomendación de derribo en campo. Es el árbol de mayor porte del parque (D=118,2 cm; 27,1 m), con copa amplia y poco simétrica —gran brazo de palanca frente a los fuertes vientos de la zona— exudados de resina (indicador de estrés/patología del fuste) y ubicación junto a los baños (máxima concurrencia de personas). La probabilidad de fallo combinada con la alta exposición vuelve inaceptable el riesgo. Se recomienda DERRIBO técnico controlado, previa verificación instrumental (resistógrafo/tomografía) si se dispone del equipo."),
-8:("CONSERVAR-INT","Caída y riesgo Medios, pero RAÍZ en MAL estado en un árbol alto (17,8 m): punto crítico de anclaje. Poda de aligeramiento/reducción de la vela para disminuir la carga de viento e inspección radicular; si se confirma pérdida de anclaje, reevaluar derribo. Monitoreo PRIORITARIO."),
-9:("CONSERVAR","Estructura y anclaje buenos; riesgo y caída bajos. Retiro de clavos/alambres y mantenimiento."),
-10:("CONSERVAR","Ejemplar alto (20,7 m) en buen estado general, raíz buena y caída baja. Mantenimiento menor: retiro de clavos/alambres y manejo de epífitas."),
-11:("CONSERVAR-INT","Mayor VALOR de riesgo del inventario (2,97), pero originado por daño a infraestructura por raíces (Alto) e inclinación en espacio estrecho, NO por deterioro estructural: fuste, ramas, hojas y cima BUENOS. Especie NATIVA (nogal andino). Poda de reequilibrio y manejo de raíz (barreras / reparación de adoquín); no procede derribo."),
-12:("CONSERVAR","Buen estado; riesgo y caída bajos. Poda menor y tratamiento de heridas."),
-13:("CONSERVAR-INT","Buen anclaje (raíz buena) y caída baja. Poda ligera, manejo de epífitas y retiro de objetos extraños."),
-14:("CONSERVAR","Palma en buen estado; riesgo mínimo. Mantenimiento (retiro de hojas secas)."),
-15:("CONSERVAR-INT","Riesgo alto por fuste MUY inclinado en espacio estrecho y daño de raíz a infraestructura (Alto); caída Media. Poda de reequilibrio de copa para reducir carga en el lado inclinado y VIGILANCIA de la inclinación; si progresa, reevaluar."),
-16:("CONSERVAR","Ejemplar joven en buen estado; riesgo mínimo. Mantenimiento."),
-17:("CONSERVAR","Buen estado general; riesgo mínimo. Mantenimiento."),
-18:("CONSERVAR","Riesgo bajo pese a fuste torcido; caída baja. Poda de formación y tratamiento de heridas."),
-19:("CONSERVAR-INT","Riesgo bajo; cima mala y presencia de hongos. Poda sanitaria y manejo."),
-20:("CONSERVAR","Riesgo bajo, buen anclaje. Poda menor y manejo de epífitas."),
-21:("CONSERVAR-INT","Especie NATIVA (molle). Riesgo alto por fuste MUY inclinado; caída Media, estructura buena (fuste y corteza buenos). Poda de reequilibrio y VIGILANCIA de la inclinación."),
-22:("CONSERVAR-INT","Riesgo alto por inclinación y copa irregular; caída Media, fuste bueno. Poda de reequilibrio y de saneamiento."),
-23:("CONSERVAR","Palma en buen estado; riesgo mínimo. Mantenimiento."),
-24:("CONSERVAR-INT","Fuste bueno y raíz buena → riesgo de CAÍDA no crítico (Media); el problema es la afectación a construcciones, circulación y raíces (Alto) por su ubicación en esquina/espacio estrecho con raíces descubiertas. Corresponde manejo de raíz (barreras, reparación de adoquín) y poda, NO derribo. Caso típico de daño al ornato con árbol estructuralmente sano."),
-25:("CONSERVAR-INT","Riesgo alto por fuste muy inclinado; caída Media, ejemplar pequeño (D=7,6 cm). Poda de reequilibrio y tratamiento de heridas/descortezamiento."),
-}
-for t in trees:
-    t["cat"], t["fund"] = VER[t["row"]]
-
-CAT_LABEL = {"DERRIBO":"Derribo","CONSERVAR-INT":"Conservar con intervención","CONSERVAR":"Conservar"}
-
-def fnum(v, dec=1):
-    if v is None: return "-"
-    try:
-        f = float(v)
-        return ("%.*f" % (dec, f)).replace(".", ",")
-    except Exception:
-        return str(v)
-
-# ================= CONSTRUCCIÓN DEL DOCUMENTO =================
-doc = Document()
-# estilo base
-st = doc.styles["Normal"]
-st.font.name = "Calibri"; st.font.size = Pt(10.5)
-sec = doc.sections[0]
-sec.top_margin = Cm(2); sec.bottom_margin = Cm(2)
-sec.left_margin = Cm(2.2); sec.right_margin = Cm(2.2)
-
-def set_cell_bg(cell, hexcolor):
-    tcPr = cell._tc.get_or_add_tcPr()
-    shd = OxmlElement("w:shd"); shd.set(qn("w:val"), "clear")
-    shd.set(qn("w:fill"), hexcolor); tcPr.append(shd)
-
-def cell_text(cell, text, bold=False, color=None, size=9, align="left", white=False):
-    cell.text = ""
-    p = cell.paragraphs[0]
-    p.alignment = {"left":WD_ALIGN_PARAGRAPH.LEFT,"center":WD_ALIGN_PARAGRAPH.CENTER,"right":WD_ALIGN_PARAGRAPH.RIGHT}[align]
-    run = p.add_run(str(text))
-    run.bold = bold; run.font.size = Pt(size)
-    if white: run.font.color.rgb = RGBColor(0xFF,0xFF,0xFF)
-    elif color: run.font.color.rgb = color
-
-def H(text, level=1, color=VERDE):
-    h = doc.add_heading(level=level)
-    run = h.add_run(text); run.font.color.rgb = color
-    if level == 1: run.font.size = Pt(15)
-    elif level == 2: run.font.size = Pt(12.5)
-    return h
-
-def P(text, size=10.5, bold=False, italic=False, align="justify", color=None, space_after=6):
-    p = doc.add_paragraph()
-    p.alignment = {"justify":WD_ALIGN_PARAGRAPH.JUSTIFY,"left":WD_ALIGN_PARAGRAPH.LEFT,"center":WD_ALIGN_PARAGRAPH.CENTER,"right":WD_ALIGN_PARAGRAPH.RIGHT}[align]
-    r = p.add_run(text); r.bold = bold; r.italic = italic; r.font.size = Pt(size)
-    if color: r.font.color.rgb = color
-    p.paragraph_format.space_after = Pt(space_after)
-    return p
-
-def bullet(text, size=10.5):
-    p = doc.add_paragraph(style="List Bullet")
-    r = p.add_run(text); r.font.size = Pt(size)
-    return p
-
-# ---------------- PORTADA ----------------
-for _ in range(2): doc.add_paragraph()
-P("UNIVERSIDAD NACIONAL DE LOJA", size=13, bold=True, align="center", color=VERDE)
-P("Facultad Agropecuaria y de Recursos Naturales Renovables", size=11, align="center", color=GRIS)
-P("Laboratorio de Dendrocronología y Anatomía de la Madera", size=11, align="center", color=GRIS, space_after=24)
-doc.add_paragraph()
-P("INFORME TÉCNICO DE EVALUACIÓN DEL ARBOLADO URBANO", size=18, bold=True, align="center", color=VERDE)
-P("Parque Central del cantón Saraguro", size=15, bold=True, align="center", color=GRIS, space_after=6)
-P("Diagnóstico dendrométrico, estado fitosanitario y evaluación del riesgo de caída, con veredicto técnico de conservación o derribo", size=11, italic=True, align="center", color=GRIS, space_after=24)
-doc.add_paragraph()
-P("Solicitado por: Gobierno Autónomo Descentralizado Municipal Intercultural de Saraguro", size=10.5, align="center")
-P("Oficio Nro. 0286-A-GADMIS (19/05/2026) — Autorización Rectorado UNL-R-2026-2083-M (28/05/2026)", size=10, align="center", color=GRIS)
-P("Referencia: UNL-SG-2026-0421-EX", size=10, align="center", color=GRIS, space_after=24)
-doc.add_paragraph(); doc.add_paragraph()
-P("Responsable técnico: Ph.D. Darwin Alexander Pucha Cofrep", size=11, bold=True, align="center")
-P("Responsable del Laboratorio de Dendrocronología — Director de la Maestría en Biodiversidad y Cambio Climático", size=10, align="center", color=GRIS)
-P("Equipo de campo: Darwin Pucha · Ariel Arévalo", size=10, align="center", color=GRIS, space_after=18)
-P("Plataforma de consulta pública: https://arbolec.unl.edu.ec/ec/Saraguro", size=10, align="center", color=AZUL)
-P("Loja, 11 de julio de 2026", size=10.5, bold=True, align="center", color=GRIS)
+# ---------- PORTADA ----------
+logo_tbl=doc.add_table(rows=1,cols=2); logo_tbl.alignment=WD_TABLE_ALIGNMENT.CENTER
+lc=logo_tbl.rows[0].cells
+lc[0].paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.LEFT
+lc[0].paragraphs[0].add_run().add_picture(D.LOGO_UNL,width=Cm(7.2))
+lc[1].paragraphs[0].alignment=WD_ALIGN_PARAGRAPH.RIGHT
+lc[1].paragraphs[0].add_run().add_picture(D.LOGO_ARBOLEC,width=Cm(2.7))
+P("",after=4)
+P("UNIVERSIDAD NACIONAL DE LOJA",size=13,bold=True,align="center",color=VERDE,after=0)
+P("Facultad Agropecuaria y de Recursos Naturales Renovables · Laboratorio de Dendrocronología",size=10.5,align="center",color=GRIS,after=18)
+P("INFORME TÉCNICO DE EVALUACIÓN DEL ARBOLADO URBANO",size=18,bold=True,align="center",color=VERDE,after=2)
+P("Parque Central y Avenida El Oro del cantón Saraguro",size=15,bold=True,align="center",color=GRIS,after=4)
+P("Diagnóstico dendrométrico, estado fitosanitario y evaluación del riesgo de caída, con veredicto técnico de conservación o derribo",size=11,italic=True,align="center",color=GRIS,after=20)
+P("Solicitado por el Gobierno Autónomo Descentralizado Municipal Intercultural de Saraguro",size=10.5,align="center",after=2)
+P("Oficio Nro. 0286-A-GADMIS (19/05/2026) — Autorización Rectorado UNL-R-2026-2083-M (28/05/2026)",size=10,align="center",color=GRIS,after=2)
+P("Referencia: UNL-SG-2026-0421-EX",size=10,align="center",color=GRIS,after=20)
+P("Responsable técnico: Ph.D. Darwin Alexander Pucha Cofrep",size=11,bold=True,align="center",after=2)
+P("Responsable del Laboratorio de Dendrocronología — Director de la Maestría en Biodiversidad y Cambio Climático",size=10,align="center",color=GRIS,after=2)
+P("Equipo de campo: Darwin Pucha · Ariel Arévalo · Cristian Retete",size=10,align="center",color=GRIS,after=6)
+P("Plataforma de consulta pública: %s"%D.BASE_URL,size=10,align="center",color=AZUL,after=2)
+P("Loja, 11 de julio de 2026",size=10.5,bold=True,align="center",color=GRIS)
 doc.add_page_break()
 
-# ---------------- 1. ANTECEDENTES ----------------
-H("1. Antecedentes y justificación", 1)
+# ---------- 1-2 ----------
+H("1. Antecedentes y justificación",1)
 P("El Gobierno Autónomo Descentralizado Municipal Intercultural de Saraguro, mediante Oficio Nro. 0286-A-GADMIS del 19 de mayo de 2026, suscrito por el Lic. Segundo Abel Sarango Quizhpe, Alcalde del cantón, solicitó a la Universidad Nacional de Loja el apoyo técnico para la inspección, evaluación y emisión de un criterio especializado sobre el estado actual de los árboles del Parque Central de Saraguro.")
-P("El Municipio expuso su preocupación por: (i) el crecimiento radicular de varios árboles, que ha ocasionado afectaciones visibles en verjas, adoquinado y estructuras de concreto de las parcelas ornamentales; y (ii) el estado fitosanitario y la estabilidad estructural de dichos árboles frente a las fuertes corrientes de viento propias de la zona, situación que podría representar un riesgo para la seguridad de la ciudadanía. El oficio destaca de manera particular la presencia histórica de cipreses (registros fotográficos de la década de 1960), con reconocido valor simbólico y patrimonial para la comunidad saragurense.")
-P("Mediante Memorando Nro. UNL-R-2026-2083-M del 28 de mayo de 2026, el Rector de la Universidad Nacional de Loja, Dr. Nikolay Aguirre Mendoza, autorizó la participación del Ph.D. Darwin Alexander Pucha Cofrep, Responsable del Laboratorio de Dendrocronología, para el desarrollo de las actividades requeridas, en coordinación directa con el Municipio.")
-P("El presente informe responde a esa solicitud. Su finalidad es entregar un criterio técnico OBJETIVO y verificable que sustente la decisión de conservar o derribar cada árbol, atendiendo especialmente al riesgo de caída y a los cipreses señalados por el Municipio. Se deja constancia de que la recomendación de derribo se emite con carácter restrictivo: solo se propone cuando la evidencia de campo demuestra un riesgo inaceptable para las personas o los bienes.")
+P("El Municipio expuso su preocupación por: (i) el crecimiento radicular de varios árboles, que ha ocasionado afectaciones en verjas, adoquinado y estructuras de concreto; y (ii) el estado fitosanitario y la estabilidad estructural frente a las fuertes corrientes de viento de la zona, situación que podría representar un riesgo para la seguridad ciudadana. El oficio destaca la presencia histórica de cipreses (registros fotográficos de la década de 1960), de reconocido valor simbólico y patrimonial.")
+P("Mediante Memorando Nro. UNL-R-2026-2083-M del 28 de mayo de 2026, el Rector, Dr. Nikolay Aguirre Mendoza, autorizó la participación del Ph.D. Darwin Alexander Pucha Cofrep, Responsable del Laboratorio de Dendrocronología.")
+P("El presente informe entrega un criterio técnico OBJETIVO y verificable para conservar o derribar cada árbol, con énfasis en el riesgo de caída y en los cipreses señalados. La evaluación se amplió, a solicitud del Municipio, a cuatro árboles de la isleta de la Avenida El Oro, contiguos al parque. La recomendación de derribo se emite con carácter restrictivo: solo cuando la evidencia demuestra un riesgo inaceptable para las personas o los bienes.")
+H("2. Objetivos",1)
+for x in ["Inventariar y diagnosticar (dendrométrica y fitosanitariamente) el arbolado del Parque Central de Saraguro y de la isleta de la Avenida El Oro.",
+          "Evaluar el nivel de riesgo de cada árbol, con énfasis en el riesgo de caída frente a las condiciones de viento y de sitio.",
+          "Analizar de forma individual los cipreses del parque, por su relevancia patrimonial y por ser objeto de la preocupación municipal.",
+          "Emitir un veredicto técnico por árbol —conservación o derribo— con su respectivo fundamento."]:
+    bullet(x)
+doc.add_page_break()
 
-# ---------------- 2. OBJETIVOS ----------------
-H("2. Objetivos", 1)
-bullet("Realizar el inventario y diagnóstico dendrométrico y fitosanitario del arbolado del Parque Central de Saraguro.")
-bullet("Evaluar el nivel de riesgo de cada árbol, con énfasis en el riesgo de caída (fallo estructural) frente a las condiciones de viento y de sitio.")
-bullet("Analizar de forma individual los cipreses del parque, por su relevancia patrimonial y por ser objeto expreso de la preocupación municipal.")
-bullet("Emitir un veredicto técnico por árbol —conservación o derribo— con su respectivo fundamento, como base para la toma de decisiones del GAD Municipal.")
+# ---------- 3 METODOLOGÍA ----------
+H("3. Metodología",1)
+P("El levantamiento se realizó mediante inspección visual en campo (metodología tipo VTA, Visual Tree Assessment) y registro georreferenciado con GPS, sistematizado en la plataforma institucional ArboLEC (%s), donde el inventario queda publicado para consulta pública. Cada árbol posee una ficha individual accesible por su código."%D.BASE_URL)
+P("Por cada individuo se registraron: identificación taxonómica, ubicación (coordenadas y código Plus Code), variables dendrométricas (circunferencia y diámetro, altura total y comercial, dimensiones de copa, follaje), estado de madurez, rectitud de fuste y espacio de crecimiento; la condición estructural y sanitaria de raíz, fuste, corteza, ramas, hojas, cima y copa; enfermedades, plagas y daños físicos; y los factores de riesgo (caída, afectación a construcciones, circulación, daño de raíces e interferencia con redes aéreas).")
+P("Escala de riesgo. Cada factor se califica en Bajo, Medio y Alto; el sistema integra un Riesgo total (categórico) y un Valor de riesgo (índice ~1,0–3,0). Se distinguen dos conceptos clave:",after=4)
+bullet("Riesgo total / valor de riesgo: índice global que combina TODOS los factores (incluido el daño de raíces a la infraestructura). Un valor alto no implica, por sí solo, peligro de caída.")
+bullet("Riesgo de caída: probabilidad de fallo estructural (volcamiento o rotura). Criterio rector para una eventual recomendación de derribo.")
+P("Criterio de veredicto. Se recomienda DERRIBO únicamente cuando concurre un riesgo de caída Alto (o fallo estructural irreversible) con exposición de personas o bienes, y cuando el defecto no es corregible por poda o tratamiento. En los demás casos, CONSERVACIÓN con o sin intervención. Criterio deliberadamente conservador que protege la seguridad ciudadana y el patrimonio arbóreo.",after=8)
+H("3.1. Mapa de ubicación de los árboles",2)
+pmap=doc.add_paragraph(); pmap.alignment=WD_ALIGN_PARAGRAPH.CENTER
+pmap.add_run().add_picture(D.MAPA,width=Cm(17))
+P("Figura 1. Ubicación georreferenciada (GPS, WGS84) de los %d árboles evaluados en el Parque Central y en la isleta de la Avenida El Oro, con su veredicto técnico. En rojo, el único árbol propuesto para derribo (A06)."%D.n,size=8.5,italic=True,align="center",color=GRIS,after=8)
+H("3.2. Registro fotográfico del trabajo de campo",2)
+P("Se reserva el siguiente espacio para las fotografías del levantamiento en campo (mediciones dendrométricas, inspección visual y georreferenciación):",size=10)
+photo_strip(["Campo 1","Campo 2","Campo 3"],height=3.4)
+P("",after=2)
+photo_strip(["Campo 4","Campo 5","Campo 6"],height=3.4)
+doc.add_page_break()
 
-# ---------------- 3. METODOLOGÍA ----------------
-H("3. Metodología", 1)
-P("El levantamiento se realizó mediante inspección visual en campo (metodología tipo VTA, Visual Tree Assessment) y registro georreferenciado con GPS, sistematizado en la plataforma institucional ArboLEC de la Universidad Nacional de Loja (https://arbolec.unl.edu.ec/ec/Saraguro), donde el inventario queda publicado y disponible para consulta pública.")
-P("Por cada individuo se registraron: identificación taxonómica (especie, familia, nombres comunes), ubicación (coordenadas y código Plus Code), variables dendrométricas (circunferencia y diámetro del fuste, altura total y comercial, dimensiones de copa, porcentaje de follaje), estado de madurez, rectitud del fuste y espacio de crecimiento; la condición estructural y sanitaria de raíz, fuste, corteza, ramas, hojas, cima y copa; la presencia de enfermedades, plagas y daños físicos; y los factores de riesgo (caída, afectación a construcciones, interferencia con la circulación, daño a infraestructura por raíces e interferencia con redes aéreas).", space_after=6)
-P("Escala de valoración del riesgo. Cada factor se califica en tres niveles —Bajo, Medio y Alto— y el sistema integra un Riesgo total (categórico) con su Valor de riesgo total (índice numérico, aprox. 1,0–3,0). Es fundamental distinguir dos conceptos que se usan a lo largo del informe:", space_after=4)
-bullet("Riesgo total / Valor de riesgo: índice global que combina TODOS los factores (incluidos los daños a infraestructura por raíces). Un valor alto no implica, por sí solo, peligro de caída.")
-bullet("Riesgo de caída: probabilidad de fallo estructural (volcamiento o rotura) del árbol. Es el factor determinante para la seguridad de las personas y, por tanto, el criterio rector para una eventual recomendación de derribo.")
-P("Criterio de veredicto adoptado. Se recomienda DERRIBO únicamente cuando concurre un riesgo de caída Alto (o evidencia de fallo estructural irreversible) junto con exposición de personas o bienes, y cuando el defecto no es corregible mediante poda o tratamiento. En los demás casos se recomienda CONSERVACIÓN, con o sin intervención (poda, tratamiento fitosanitario, manejo de raíces, retiro de objetos extraños y monitoreo). Este criterio, deliberadamente conservador, protege tanto la seguridad ciudadana como el patrimonio arbóreo del parque.", space_after=8)
-
-# ================= ESTADÍSTICOS =================
-from docx.enum.section import WD_SECTION
-n = len(trees)
-species = {}
-families = {}
-for t in trees:
-    species[t["especie"]] = species.get(t["especie"], 0) + 1
-    families[t["familia"]] = families.get(t["familia"], 0) + 1
-risk_counts = {"Alto":0, "Medio":0, "Bajo":0}
-caida_counts = {"Alto":0, "Medio":0, "Bajo":0}
-for t in trees:
-    risk_counts[t["riesgo"]] = risk_counts.get(t["riesgo"], 0) + 1
-    caida_counts[t["caida"]] = caida_counts.get(t["caida"], 0) + 1
-cupres = [t for t in trees if t["familia"] == "Cupressaceae"]
-n_derribo = sum(1 for t in trees if t["cat"] == "DERRIBO")
-n_int = sum(1 for t in trees if t["cat"] == "CONSERVAR-INT")
-n_cons = sum(1 for t in trees if t["cat"] == "CONSERVAR")
-vals = [float(t["valriesgo"]) for t in trees if t["valriesgo"] is not None]
-hts = [float(t["ht"]) for t in trees if t["ht"] is not None]
-ds = [float(t["d"]) for t in trees if t["d"] is not None]
-
-def landscape():
-    s = doc.add_section(WD_SECTION.NEW_PAGE)
-    s.orientation = WD_ORIENT.LANDSCAPE
-    s.page_width, s.page_height = Cm(29.7), Cm(21)
-    s.top_margin = Cm(1.5); s.bottom_margin = Cm(1.5)
-    s.left_margin = Cm(1.5); s.right_margin = Cm(1.5)
-    return s
-def portrait():
-    s = doc.add_section(WD_SECTION.NEW_PAGE)
-    s.orientation = WD_ORIENT.PORTRAIT
-    s.page_width, s.page_height = Cm(21), Cm(29.7)
-    s.top_margin = Cm(2); s.bottom_margin = Cm(2)
-    s.left_margin = Cm(2.2); s.right_margin = Cm(2.2)
-    return s
-
-def header_row(table, labels):
-    hdr = table.rows[0].cells
-    for i, lab in enumerate(labels):
-        cell_text(hdr[i], lab, bold=True, white=True, size=8.5, align="center")
-        set_cell_bg(hdr[i], HDR_FILL)
-
-CAT_FILL = {"DERRIBO":ROJO_FILL, "CONSERVAR-INT":NARANJA_FILL, "CONSERVAR":VERDE_FILL}
-RISK_COLOR = {"Alto":ROJO, "Medio":NARANJA, "Bajo":VERDE}
-
-# ---------------- 4. RESULTADOS GENERALES ----------------
-H("4. Resultados generales del inventario", 1)
-P("Se inventariaron %d árboles en el Parque Central (Sección S1), correspondientes a %d especies y %d familias botánicas. La familia Cupressaceae (los cipreses) es la más representada, con %d individuos (%.0f%% del total), lo que confirma su carácter dominante y su valor identitario en el parque, tal como lo señala el oficio municipal." % (n, len(species), len(families), len(cupres), 100*len(cupres)/n))
-P("Rango dendrométrico: altura total de %s a %s m y diámetro de fuste de %s a %s cm, lo que refleja un arbolado heterogéneo que combina ejemplares jóvenes y de pequeño porte con individuos maduros de gran tamaño —estos últimos, principalmente cipreses—. El de mayor porte es el ciprés común %s (%s, ref. de campo «%s»), con 27,1 m de altura y 118,2 cm de diámetro." % (fnum(min(hts)), fnum(max(hts)), fnum(min(ds)), fnum(max(ds)), "A06", trees[5]["codigo"], trees[5]["ref"]))
-
-P("Composición por especie:", bold=True, space_after=2)
-sp_sorted = sorted(species.items(), key=lambda x: (-x[1], x[0]))
-tsp = doc.add_table(rows=1, cols=4); tsp.style = "Table Grid"; tsp.alignment = WD_TABLE_ALIGNMENT.CENTER
-header_row(tsp, ["Especie", "Nombre común", "Familia", "N°"])
-comun_by_sp = {}
-fam_by_sp = {}
-for t in trees:
-    comun_by_sp.setdefault(t["especie"], t["comun"])
-    fam_by_sp.setdefault(t["especie"], t["familia"])
-for sp, cnt in sp_sorted:
-    row = tsp.add_row().cells
-    cell_text(row[0], sp, italic if False else False, size=8.5); row[0].paragraphs[0].runs[0].italic = True
-    cell_text(row[1], comun_by_sp.get(sp, ""), size=8.5)
-    cell_text(row[2], fam_by_sp.get(sp, ""), size=8.5)
-    cell_text(row[3], str(cnt), size=8.5, align="center")
-doc.add_paragraph()
-
-P("Distribución del riesgo total:", bold=True, space_after=2)
-tr = doc.add_table(rows=1, cols=4); tr.style = "Table Grid"; tr.alignment = WD_TABLE_ALIGNMENT.CENTER
-header_row(tr, ["Nivel de riesgo total", "N° de árboles", "%", "Interpretación"])
-interp = {"Alto":"Requieren intervención y/o seguimiento", "Medio":"Intervención preventiva / monitoreo", "Bajo":"Mantenimiento ordinario"}
+# ---------- 4 RESULTADOS ----------
+H("4. Resultados generales del inventario",1)
+P("Se inventariaron %d árboles: %d en el Parque Central y %d en la isleta de la Avenida El Oro, de %d especies y %d familias. La familia Cupressaceae (cipreses) es la más representada, con %d individuos (%.0f%%). El rango dendrométrico va de %s a %s m de altura y de %s a %s cm de diámetro; el mayor es el ciprés común A06 (código %s), con 27,1 m y 118,2 cm."%(
+    D.n,D.n_parque,D.n_av,len(D.species),len(D.families),len(D.cupres),100*len(D.cupres)/D.n,
+    fnum(min(float(t['ht']) for t in D.trees)),fnum(max(float(t['ht']) for t in D.trees)),
+    fnum(min(float(t['d']) for t in D.trees)),fnum(max(float(t['d']) for t in D.trees)),D.DERRIBO_TREE['codigo']))
+P("Composición por especie:",bold=True,after=2)
+tsp=doc.add_table(rows=1,cols=4); tsp.style="Table Grid"; tsp.alignment=WD_TABLE_ALIGNMENT.CENTER
+hdr_row(tsp,["Especie","Nombre común","Familia","N°"])
+for sp,cnt in sorted(D.species.items(),key=lambda x:(-x[1],x[0])):
+    row=tsp.add_row().cells
+    ctext(row[0],sp,size=8.5); row[0].paragraphs[0].runs[0].italic=True
+    ctext(row[1],D.comun_by.get(sp,""),size=8.5); ctext(row[2],D.fam_by.get(sp,""),size=8.5); ctext(row[3],str(cnt),size=8.5,align="center")
+P("",after=6)
+P("Distribución del riesgo total:",bold=True,after=2)
+tr=doc.add_table(rows=1,cols=4); tr.style="Table Grid"; tr.alignment=WD_TABLE_ALIGNMENT.CENTER
+hdr_row(tr,["Nivel de riesgo total","N° de árboles","%","Interpretación"])
+interp={"Alto":"Requieren intervención y/o seguimiento","Medio":"Intervención preventiva / monitoreo","Bajo":"Mantenimiento ordinario"}
 for lvl in ["Alto","Medio","Bajo"]:
-    row = tr.add_row().cells
-    cell_text(row[0], lvl, bold=True, color=RISK_COLOR[lvl], size=9, align="center")
-    cell_text(row[1], str(risk_counts[lvl]), size=9, align="center")
-    cell_text(row[2], "%.0f%%" % (100*risk_counts[lvl]/n), size=9, align="center")
-    cell_text(row[3], interp[lvl], size=9)
-P("Nota: el riesgo total integra todos los factores, incluido el daño a infraestructura por raíces; por ello varios árboles estructuralmente sanos figuran en riesgo «Alto» sin ser candidatos a derribo (ver Sección 5).", size=9, italic=True, color=GRIS, space_after=8)
+    row=tr.add_row().cells
+    ctext(row[0],lvl,bold=True,color=RISKC[lvl],size=9,align="center")
+    ctext(row[1],str(D.risk_counts[lvl]),size=9,align="center"); ctext(row[2],"%.0f%%"%(100*D.risk_counts[lvl]/D.n),size=9,align="center"); ctext(row[3],interp[lvl],size=9)
+P("Nota: el riesgo total integra todos los factores, incluido el daño de raíces a la infraestructura; por ello varios árboles estructuralmente sanos figuran en riesgo «Alto» sin ser candidatos a derribo.",size=9,italic=True,color=GRIS,after=8)
 
-# ---------------- 5. RIESGO DE CAÍDA (ÉNFASIS) ----------------
-H("5. Análisis del riesgo de caída (énfasis)", 1)
-P("El riesgo de caída es el criterio central de este informe por su relación directa con la seguridad de las personas. La distribución obtenida es la siguiente:", space_after=4)
-tc = doc.add_table(rows=1, cols=3); tc.style = "Table Grid"; tc.alignment = WD_TABLE_ALIGNMENT.CENTER
-header_row(tc, ["Riesgo de caída", "N° de árboles", "%"])
+# ---------- 5 CAÍDA ----------
+H("5. Análisis del riesgo de caída (énfasis)",1)
+P("El riesgo de caída es el criterio central por su relación directa con la seguridad de las personas. Distribución obtenida:",after=4)
+tc=doc.add_table(rows=1,cols=3); tc.style="Table Grid"; tc.alignment=WD_TABLE_ALIGNMENT.CENTER
+hdr_row(tc,["Riesgo de caída","N° de árboles","%"])
 for lvl in ["Alto","Medio","Bajo"]:
-    row = tc.add_row().cells
-    cell_text(row[0], lvl, bold=True, color=RISK_COLOR[lvl], size=9, align="center")
-    cell_text(row[1], str(caida_counts[lvl]), size=9, align="center")
-    cell_text(row[2], "%.0f%%" % (100*caida_counts[lvl]/n), size=9, align="center")
-doc.add_paragraph()
-P("Hallazgo principal. De los %d árboles evaluados, UN (1) solo individuo presenta riesgo de caída ALTO: el ciprés común identificado como A06 (código %s, referencia de campo «%s»). Este mismo árbol es el único con recomendación de DERRIBO en el levantamiento de campo. Diez (10) árboles presentan riesgo de caída Medio —manejables mediante poda de reequilibrio, tratamiento y vigilancia— y trece (13) presentan riesgo de caída Bajo." % (n, trees[5]["codigo"], trees[5]["ref"]), space_after=6)
-P("Este resultado es determinante para el veredicto: aunque el 33% del arbolado figura en riesgo total «Alto», ese nivel está mayoritariamente asociado a fustes inclinados y a daños de raíces sobre el adoquinado y las estructuras de concreto —el problema que motivó la solicitud municipal— y NO a una probabilidad real de volcamiento. En términos de seguridad por caída, el parque presenta un único punto crítico. Debe subrayarse que la inclinación del fuste y el daño radicular, si bien no implican caída inminente, sí requieren seguimiento: se establecen como árboles de VIGILANCIA los A07 (raíz en mal estado, 17,8 m), A14 y A20 (fustes muy inclinados).", space_after=6)
-P("Recomendación de método: para el árbol A06, y ante cualquier duda futura sobre ejemplares de gran porte, se aconseja confirmar el diagnóstico con evaluación instrumental (resistógrafo o tomografía sónica) antes de ejecutar el derribo, de modo que la decisión quede respaldada por medición directa del estado interno del fuste.", space_after=8)
+    row=tc.add_row().cells
+    ctext(row[0],lvl,bold=True,color=RISKC[lvl],size=9,align="center"); ctext(row[1],str(D.caida_counts[lvl]),size=9,align="center"); ctext(row[2],"%.0f%%"%(100*D.caida_counts[lvl]/D.n),size=9,align="center")
+P("",after=4)
+P("Hallazgo principal. De los %d árboles, UN (1) solo individuo presenta riesgo de caída ALTO: el ciprés común A06 (código %s, ref. «%s»), único con recomendación de DERRIBO en campo. Catorce (14) árboles presentan caída Media —manejables con poda de reequilibrio, tratamiento y vigilancia— y trece (13) caída Baja."%(D.n,D.DERRIBO_TREE['codigo'],D.DERRIBO_TREE['ref']),after=6)
+P("Este resultado es determinante: aunque el %.0f%% del arbolado figura en riesgo total «Alto», ese nivel se asocia mayoritariamente a fustes inclinados y a daños de raíces sobre el adoquinado y el concreto —el problema que motivó la solicitud— y NO a una probabilidad real de volcamiento. Se establecen como árboles de VIGILANCIA por sus defectos estructurales: A07 (raíz en mal estado, 17,8 m), A14 y A20 (fustes muy inclinados) y, en la avenida, AV02 (pudrición del tronco en un molle) y AV04 (acacia vieja con raíz y fuste en mal estado)."%(100*D.risk_counts['Alto']/D.n),after=6)
+P("Recomendación de método: para A06, y ante dudas sobre ejemplares de gran porte o con pudrición (AV02, AV04), se aconseja confirmar el diagnóstico con evaluación instrumental (resistógrafo o tomografía sónica) antes de cualquier decisión de derribo.",after=8)
 
-# ---------------- 6. ANÁLISIS INDIVIDUAL DE LOS CIPRESES ----------------
-H("6. Análisis individual de los cipreses", 1)
-P("Atendiendo a la preocupación expresa del Municipio y al valor patrimonial de estas especies, se analiza individualmente cada uno de los %d cipreses del parque (4 Cupressus sempervirens — ciprés vela; 3 Hesperocyparis macrocarpa — ciprés común). Se precisa que ambas especies son introducidas (originarias del Mediterráneo y de California, respectivamente); su valor es cultural, histórico y paisajístico —plenamente reconocido en este informe— más que estrictamente ecológico." % len(cupres), space_after=6)
-for t in cupres:
-    H("Ciprés %s — %s (%s)" % (t["id"], t["especie"], t["comun"]), 2, color=(ROJO if t["cat"]=="DERRIBO" else VERDE))
-    tt = doc.add_table(rows=1, cols=4); tt.style = "Table Grid"
-    tt.rows[0].cells[0].width = Cm(4)
-    data = [
-        ("Código / Ref. campo", "%s / %s" % (t["codigo"], t["ref"] or "s/n"), "Coordenadas", "%s, %s" % (fnum(t["lat"],6), fnum(t["lon"],6))),
-        ("Diámetro / Altura total", "%s cm / %s m" % (fnum(t["d"]), fnum(t["ht"])), "Copa (NS×EW)", "%s × %s m" % (fnum(t["copaNS"]), fnum(t["copaEW"]))),
-        ("Rectitud / Espacio", "%s / %s" % (t["rectitud"], t["espacio"]), "Follaje", "%s%%" % t["follaje"]),
-        ("Raíz / Fuste (estado)", "%s / %s" % (t["raiz"], t["fuste_est"]), "Riesgo total (valor)", "%s (%s)" % (t["riesgo"], fnum(t["valriesgo"],2))),
-        ("RIESGO DE CAÍDA", t["caida"], "Afect. infraestructura (raíz)", t["afec_raiz"]),
-    ]
+# ---------- 6 CIPRESES ----------
+H("6. Análisis individual de los cipreses",1)
+P("Atendiendo a la preocupación del Municipio y al valor patrimonial de estas especies, se analiza cada uno de los %d cipreses (4 Cupressus sempervirens — ciprés vela; 3 Hesperocyparis macrocarpa — ciprés común). Ambas especies son introducidas (Mediterráneo y California); su valor es cultural, histórico y paisajístico —reconocido aquí— más que estrictamente ecológico. Bajo la ficha de cada uno se reserva espacio para tres fotografías y se indica su dirección en ArboLEC."%len(D.cupres),after=6)
+for t in D.cupres:
+    H("Ciprés %s — %s (%s)"%(t["id"],t["especie"],t["comun"]),2,color=(ROJO if t["cat"]=="DERRIBO" else VERDE))
+    tt=doc.add_table(rows=1,cols=4); tt.style="Table Grid"
+    data=[("Código / Ref. campo","%s / %s"%(t["codigo"],t["ref"] or "s/n"),"Coordenadas","%s, %s"%(fnum(t["lat"],6),fnum(t["lon"],6))),
+          ("Diámetro / Altura","%s cm / %s m"%(fnum(t["d"]),fnum(t["ht"])),"Copa (NS×EW)","%s × %s m"%(fnum(t["copaNS"]),fnum(t["copaEW"]))),
+          ("Rectitud / Espacio","%s / %s"%(t["rectitud"],t["espacio"]),"Follaje","%s%%"%t["follaje"]),
+          ("Raíz / Fuste (estado)","%s / %s"%(t["raiz"],t["fuste_est"]),"Riesgo total (valor)","%s (%s)"%(t["riesgo"],fnum(t["valriesgo"],2))),
+          ("RIESGO DE CAÍDA",t["caida"],"Afect. infraestructura (raíz)",t["afec_raiz"])]
+    first=True
     for a,b,c,d in data:
-        row = tt.add_row().cells
-        cell_text(row[0], a, bold=True, size=8.5)
-        cell_text(row[1], b, size=8.5, bold=(a=="RIESGO DE CAÍDA"),
-                  color=(RISK_COLOR.get(b) if a=="RIESGO DE CAÍDA" else None))
-        cell_text(row[2], c, bold=True, size=8.5)
-        cell_text(row[3], d, size=8.5)
-    pv = doc.add_paragraph()
-    rlab = pv.add_run("Veredicto: "); rlab.bold = True; rlab.font.size = Pt(10)
-    rcat = pv.add_run(CAT_LABEL[t["cat"]] + ". "); rcat.bold = True; rcat.font.size = Pt(10)
-    rcat.font.color.rgb = (ROJO if t["cat"]=="DERRIBO" else (NARANJA if t["cat"]=="CONSERVAR-INT" else VERDE))
-    rf = pv.add_run(t["fund"]); rf.font.size = Pt(10)
-    pv.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
-    pv.paragraph_format.space_after = Pt(10)
+        row=tt.rows[0].cells if first else tt.add_row().cells; first=False
+        ctext(row[0],a,bold=True,size=8.5); ctext(row[1],b,size=8.5,bold=(a=="RIESGO DE CAÍDA"),color=(RISKC.get(b) if a=="RIESGO DE CAÍDA" else None))
+        ctext(row[2],c,bold=True,size=8.5); ctext(row[3],d,size=8.5)
+    pv=doc.add_paragraph(); pv.alignment=WD_ALIGN_PARAGRAPH.JUSTIFY
+    rl=pv.add_run("Veredicto: "); rl.bold=True; rl.font.size=Pt(10)
+    rc=pv.add_run(CAT[t["cat"]]+". "); rc.bold=True; rc.font.size=Pt(10)
+    rc.font.color.rgb=(ROJO if t["cat"]=="DERRIBO" else (NARANJA if t["cat"]=="CONSERVAR-INT" else VERDE))
+    rf=pv.add_run(t["fund"]); rf.font.size=Pt(10); pv.paragraph_format.space_after=Pt(3)
+    url_par(t)
+    photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]])
+    P("",after=4)
+P("Síntesis de los cipreses: de los %d cipreses se recomienda el derribo de UNO (A06) por riesgo de caída alto y alta exposición; los %d restantes se CONSERVAN con poda sanitaria, manejo de epífitas, tratamiento de daños mecánicos, retiro de clavos/alambres y, en A07, monitoreo prioritario del anclaje."%(len(D.cupres),len(D.cupres)-1),after=8)
 
-P("Síntesis de los cipreses: de los %d cipreses, se recomienda el derribo de UNO (A06) por riesgo de caída alto y alta exposición; los %d restantes se CONSERVAN, con intervenciones de poda sanitaria, manejo de epífitas, tratamiento de daños mecánicos, retiro de clavos/alambres y, en el caso de A07, monitoreo prioritario del anclaje radicular. Se conserva así el conjunto patrimonial de cipreses del parque, retirando únicamente el ejemplar que representa un peligro real." % (len(cupres), len(cupres)-1), bold=False, space_after=8)
+# ---------- 7 TABLA VEREDICTO (landscape) ----------
+s=doc.add_section(WD_SECTION.NEW_PAGE); s.orientation=WD_ORIENT.LANDSCAPE
+s.page_width,s.page_height=Cm(29.7),Cm(21); s.top_margin=Cm(1.5); s.bottom_margin=Cm(1.5); s.left_margin=Cm(1.5); s.right_margin=Cm(1.5)
+H("7. Tabla resumen: conservación vs. derribo (todo el inventario)",1)
+P("Código de color: rojo = Derribo; naranja = Conservar con intervención; verde = Conservar. De los %d árboles: %d derribo, %d conservación con intervención y %d conservación con mantenimiento ordinario."%(D.n,D.n_derribo,D.n_int,D.n_cons),size=9.5,after=6)
+tv=doc.add_table(rows=1,cols=9); tv.style="Table Grid"; tv.alignment=WD_TABLE_ALIGNMENT.CENTER
+hdr_row(tv,["ID","Especie (común)","Ref.","D (cm)","H (m)","Riesgo total","Caída","VEREDICTO","Fundamento"])
+widths=[Cm(1.1),Cm(4.0),Cm(1.6),Cm(1.2),Cm(1.2),Cm(1.7),Cm(1.4),Cm(3.0),Cm(9.9)]
+for grp_label,grp in [("PARQUE CENTRAL",D.parque),("AVENIDA EL ORO (fuera del parque)",D.avenida)]:
+    grow=tv.add_row().cells; grow[0].merge(grow[8])
+    ctext(grow[0],grp_label,bold=True,white=True,size=8.5,align="left"); set_bg(grow[0],"37474F")
+    for t in grp:
+        row=tv.add_row().cells
+        vals=[t["id"],"%s (%s)"%(t["especie"],t["comun"]),t["ref"] or "-",fnum(t["d"]),fnum(t["ht"]),
+              "%s (%s)"%(t["riesgo"],fnum(t["valriesgo"],2)),t["caida"],CAT[t["cat"]],t["fund"]]
+        for i,v in enumerate(vals):
+            ctext(row[i],v,size=7.5,align=("left" if i in (1,8) else "center"),bold=(i in (0,7)))
+            set_bg(row[i],CATF[t["cat"]])
+        row[6].paragraphs[0].runs[0].font.color.rgb=RISKC.get(t["caida"],GRIS); row[6].paragraphs[0].runs[0].bold=True
+for i,w in enumerate(widths):
+    for r_ in tv.rows: r_.cells[i].width=w
 
-# ---------------- 7. TABLA RESUMEN: VEREDICTO ----------------
-landscape()
-H("7. Tabla resumen: conservación vs. derribo (todo el inventario)", 1)
-P("Veredicto técnico por árbol. Código de color: rojo = Derribo; naranja = Conservar con intervención; verde = Conservar. De los %d árboles, se recomienda %d derribo, %d conservación con intervención y %d conservación con mantenimiento ordinario." % (n, n_derribo, n_int, n_cons), size=9.5, space_after=6)
-tv = doc.add_table(rows=1, cols=9); tv.style = "Table Grid"; tv.alignment = WD_TABLE_ALIGNMENT.CENTER
-header_row(tv, ["ID", "Especie (común)", "Ref. campo", "D (cm)", "H (m)", "Riesgo total", "Caída", "VEREDICTO", "Fundamento"])
-widths = [Cm(1.0), Cm(4.2), Cm(1.7), Cm(1.3), Cm(1.3), Cm(1.7), Cm(1.4), Cm(3.0), Cm(9.8)]
-for t in trees:
-    row = tv.add_row().cells
-    vals_row = [t["id"], "%s\n(%s)" % (t["especie"], t["comun"]), t["ref"] or "-", fnum(t["d"]), fnum(t["ht"]),
-                "%s (%s)" % (t["riesgo"], fnum(t["valriesgo"],2)), t["caida"], CAT_LABEL[t["cat"]], t["fund"]]
-    for i, v in enumerate(vals_row):
-        cell_text(row[i], v, size=7.5, align=("left" if i in (1,8) else "center"),
-                  bold=(i in (0,7)))
-        set_cell_bg(row[i], CAT_FILL[t["cat"]])
-    # colorear caída
-    row[6].paragraphs[0].runs[0].font.color.rgb = RISK_COLOR.get(t["caida"], GRIS)
-    row[6].paragraphs[0].runs[0].bold = True
-for i, w in enumerate(widths):
-    for r_ in tv.rows:
-        r_.cells[i].width = w
+# ---------- 8 FOTOS (portrait) ----------
+s2=doc.add_section(WD_SECTION.NEW_PAGE); s2.orientation=WD_ORIENT.PORTRAIT
+s2.page_width,s2.page_height=Cm(21),Cm(29.7); s2.top_margin=Cm(2); s2.bottom_margin=Cm(2); s2.left_margin=Cm(2.2); s2.right_margin=Cm(2.2)
+H("8. Registro fotográfico por árbol",1)
+P("Las fotografías de cada árbol están publicadas en la plataforma ArboLEC junto con su ficha completa; se indica la dirección URL individual y se reserva espacio para tres fotografías por árbol, a insertar en la versión final del expediente municipal.",after=8)
+for grp_label,grp in [("PARQUE CENTRAL",D.parque),("AVENIDA EL ORO (fuera del parque)",D.avenida)]:
+    P(grp_label,size=11,bold=True,color=AZUL,after=4)
+    for t in grp:
+        catcol=ROJO if t["cat"]=="DERRIBO" else (NARANJA if t["cat"]=="CONSERVAR-INT" else VERDE)
+        p=doc.add_paragraph()
+        r1=p.add_run("%s — %s (%s)"%(t["id"],t["especie"],t["comun"])); r1.bold=True; r1.font.size=Pt(10); r1.font.color.rgb=VERDE
+        r2=p.add_run("   ·   Código: %s · Ref.: %s\n"%(t["codigo"],t["ref"] or "s/n")); r2.font.size=Pt(9)
+        r3=p.add_run("Coord.: %s, %s · D=%s cm · H=%s m · Follaje %s%% · Riesgo total: %s (%s) · Caída: "%(fnum(t["lat"],6),fnum(t["lon"],6),fnum(t["d"]),fnum(t["ht"]),t["follaje"],t["riesgo"],fnum(t["valriesgo"],2))); r3.font.size=Pt(9)
+        r4=p.add_run("%s"%t["caida"]); r4.font.size=Pt(9); r4.font.color.rgb=RISKC.get(t["caida"],GRIS)
+        r5=p.add_run("   ·   Veredicto: %s\n"%CAT[t["cat"]]); r5.bold=True; r5.font.size=Pt(9.5); r5.font.color.rgb=catcol
+        r6=p.add_run("Ficha del árbol: "); r6.bold=True; r6.font.size=Pt(8.5)
+        r7=p.add_run(t["url"]); r7.font.size=Pt(8.5); r7.font.color.rgb=AZUL
+        p.paragraph_format.space_after=Pt(2)
+        photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],height=2.7)
+        P("",after=4)
 
-# ---------------- 8. REGISTRO FOTOGRÁFICO ----------------
-portrait()
-H("8. Registro fotográfico por árbol", 1)
-P("Las fotografías de cada árbol se encuentran publicadas en la plataforma institucional ArboLEC, junto con su ficha completa. Cada individuo puede localizarse por su código y coordenadas en https://arbolec.unl.edu.ec/ec/Saraguro. A continuación se reserva el espacio para la fotografía de cada árbol; las imágenes se insertarán en la versión final para el expediente municipal.", space_after=8)
-for idx, t in enumerate(trees):
-    tf = doc.add_table(rows=1, cols=2); tf.style = "Table Grid"
-    tf.columns[0].width = Cm(6.5); tf.columns[1].width = Cm(10)
-    c0, c1 = tf.rows[0].cells
-    c0.width = Cm(6.5); c1.width = Cm(10)
-    # celda de foto (placeholder)
-    cell_text(c0, "", size=9)
-    pph = c0.paragraphs[0]; pph.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    rr = pph.add_run("\n[  FOTOGRAFÍA  ]\n%s\n(insertar imagen)\n" % t["id"]); rr.font.size = Pt(9); rr.font.color.rgb = GRIS; rr.italic = True
-    set_cell_bg(c0, "F2F2F2")
-    # celda de datos
-    c1.text = ""
-    p = c1.paragraphs[0]
-    r1 = p.add_run("%s — %s (%s)\n" % (t["id"], t["especie"], t["comun"])); r1.bold = True; r1.font.size = Pt(10); r1.font.color.rgb = VERDE
-    r2 = p.add_run("Código: %s   |   Ref. campo: %s\n" % (t["codigo"], t["ref"] or "s/n")); r2.font.size = Pt(9)
-    r3 = p.add_run("Coordenadas: %s, %s\n" % (fnum(t["lat"],6), fnum(t["lon"],6))); r3.font.size = Pt(9)
-    r4 = p.add_run("D=%s cm · H=%s m · Follaje %s%%\n" % (fnum(t["d"]), fnum(t["ht"]), t["follaje"])); r4.font.size = Pt(9)
-    r5 = p.add_run("Riesgo total: %s (%s) · Caída: %s\n" % (t["riesgo"], fnum(t["valriesgo"],2), t["caida"])); r5.font.size = Pt(9)
-    r5.font.color.rgb = RISK_COLOR.get(t["caida"], GRIS)
-    r6 = p.add_run("Veredicto: %s\n" % CAT_LABEL[t["cat"]]); r6.bold = True; r6.font.size = Pt(9.5)
-    r6.font.color.rgb = (ROJO if t["cat"]=="DERRIBO" else (NARANJA if t["cat"]=="CONSERVAR-INT" else VERDE))
-    r7 = p.add_run("Ficha ArboLEC: https://arbolec.unl.edu.ec/ec/Saraguro"); r7.font.size = Pt(8.5); r7.font.color.rgb = AZUL
-    doc.add_paragraph()
+# ---------- 9 CONCLUSIONES ----------
+H("9. Conclusiones y recomendaciones",1)
+P("Conclusiones:",bold=True,after=2)
+for x in ["Se evaluaron %d árboles (%d en el Parque Central y %d en la Avenida El Oro) de %d especies; la familia de los cipreses es la dominante y de mayor valor patrimonial."%(D.n,D.n_parque,D.n_av,len(D.species)),
+          "En seguridad existe UN único punto crítico de riesgo de caída Alto: el árbol A06 (ciprés común, código %s, junto a los baños), el más grande del parque y único con recomendación de derribo en campo."%D.DERRIBO_TREE["codigo"],
+          "Los demás %d árboles se CONSERVAN; su riesgo total «Alto» se explica mayoritariamente por daño de raíces a la infraestructura y por inclinación del fuste, condiciones manejables sin derribo."%(D.n-1),
+          "En la Avenida El Oro destacan dos casos que, sin ser derribo, requieren evaluación estructural y monitoreo prioritario: AV02 (molle con pudrición del tronco) y AV04 (acacia vieja con raíz y fuste en mal estado).",
+          "El daño al adoquinado y al concreto por raíces —motivo central de la solicitud— se atiende con manejo de raíces (barreras, reparación) y no justifica, por sí mismo, talar árboles sanos."]:
+    bullet(x)
+P("Recomendaciones:",bold=True,after=2)
+for x in ["Ejecutar el DERRIBO técnico controlado del árbol A06, previa verificación instrumental si se dispone del equipo, con personal especializado y medidas de seguridad por su cercanía a los baños.",
+          "Programar la CONSERVACIÓN con intervención de los demás árboles: poda sanitaria y de reequilibrio, tratamiento fitosanitario, manejo de epífitas y retiro de clavos/alambres.",
+          "Realizar EVALUACIÓN ESTRUCTURAL (resistógrafo/tomografía) de AV02 y AV04, y MONITOREO prioritario de A07 (raíz en mal estado), A14 y A20 (muy inclinados); reevaluar si progresa el deterioro o la inclinación.",
+          "Implementar manejo de raíces (barreras anti-raíz, reparación del adoquinado) en los árboles con afectación Alta a infraestructura (A10, A23, AV03 y otros), preservando el árbol.",
+          "Coordinar con la empresa eléctrica la poda de despeje donde hay interferencia Alta con redes aéreas (AV04).",
+          "Considerar un plan de reposición y sucesión a mediano plazo, priorizando especies nativas (nogal andino, molle, arupo), y mantener actualizado el inventario en ArboLEC."]:
+    bullet(x)
+P("",after=8)
+P("____________________________________",align="center",after=0)
+P("Ph.D. Darwin Alexander Pucha Cofrep",bold=True,align="center",after=0)
+P("Responsable del Laboratorio de Dendrocronología — Universidad Nacional de Loja",size=9.5,align="center",color=GRIS,after=0)
+P("Loja, 11 de julio de 2026",size=9.5,align="center",color=GRIS)
 
-# ---------------- 9. CONCLUSIONES Y RECOMENDACIONES ----------------
-H("9. Conclusiones y recomendaciones", 1)
-P("Conclusiones:", bold=True, space_after=2)
-bullet("El Parque Central de Saraguro alberga %d árboles de %d especies; la familia de los cipreses (Cupressaceae) es la dominante y de mayor valor patrimonial." % (n, len(species)))
-bullet("En términos de seguridad, el parque presenta UN único punto crítico de riesgo de caída Alto: el árbol A06 (ciprés común, código %s, junto a los baños), el más grande del parque y único con recomendación de derribo en campo." % trees[5]["codigo"])
-bullet("El resto del arbolado (%d árboles) se CONSERVA. El riesgo total «Alto» de varios ejemplares se explica mayoritariamente por daño de raíces a la infraestructura y por inclinación del fuste, condiciones manejables sin derribo." % (n-1))
-bullet("El daño al adoquinado y a las estructuras de concreto —motivo central de la solicitud municipal— se aborda con manejo de raíces (barreras físicas, reparación del adoquín, poda) y no justifica, por sí mismo, la tala de árboles estructuralmente sanos.")
-P("Recomendaciones:", bold=True, space_after=2)
-bullet("Ejecutar el DERRIBO técnico controlado del árbol A06, previa verificación instrumental si se dispone del equipo, con personal especializado y medidas de seguridad, dada su cercanía a los baños y zonas de tránsito.")
-bullet("Programar la CONSERVACIÓN con intervención de los demás árboles: poda sanitaria y de reequilibrio, tratamiento fitosanitario (hongos, exudados), manejo de epífitas y retiro de clavos/alambres del fuste.")
-bullet("Establecer MONITOREO prioritario del árbol A07 (raíz en mal estado, 17,8 m) y de los ejemplares muy inclinados (A14, A20); reevaluar si progresa la inclinación o se confirma pérdida de anclaje.")
-bullet("Implementar manejo de raíces (barreras anti-raíz, reparación del adoquinado) en los árboles con afectación Alta a infraestructura (A10, A23 y otros cipreses), preservando el árbol.")
-bullet("Considerar un plan de reposición y sucesión del arbolado a mediano plazo, priorizando especies nativas (nogal andino, molle, arupo) para acompañar el recambio natural sin perder cobertura ni identidad del parque.")
-bullet("Mantener actualizado el inventario en la plataforma ArboLEC como herramienta de gestión y seguimiento del arbolado urbano de Saraguro.")
-
-doc.add_paragraph(); doc.add_paragraph()
-P("____________________________________", align="center", space_after=0)
-P("Ph.D. Darwin Alexander Pucha Cofrep", bold=True, align="center", space_after=0)
-P("Responsable del Laboratorio de Dendrocronología — Universidad Nacional de Loja", size=9.5, align="center", color=GRIS, space_after=0)
-P("Loja, 11 de julio de 2026", size=9.5, align="center", color=GRIS)
-
-doc.save(OUT_DOCX)
-print("Informe técnico completo generado:", OUT_DOCX)
-print("Resumen -> Derribo:", n_derribo, "| Conservar c/interv:", n_int, "| Conservar:", n_cons, "| Total:", n)
-print("Caída Alto:", caida_counts["Alto"], "| Cipreses:", len(cupres))
+doc.save(OUT)
+print("Word informe:",OUT)
