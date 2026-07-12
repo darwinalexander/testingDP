@@ -1,205 +1,249 @@
 # -*- coding: utf-8 -*-
-"""Infografía 'El árbol promedio': un árbol raíz→cima con semáforo de estado
-según la MODA de los 40 árboles inventariados."""
-import os, collections
+"""Infografía científica 'Árbol tipo': ilustración botánica del árbol promedio con
+semáforo del estado por componente (moda de los 40 árboles). Fondo blanco."""
+import os, math, random, collections
 import _data as D
 
 OUT_SVG = os.path.join(os.path.dirname(__file__), "..", "assets", "infografia_arbol_promedio.svg")
+random.seed(7)
 
-# ---------- Colores ----------
-GREEN="#2E7D32"; GREEN_L="#7CB342"; AMBER="#F39C12"; AMBER_D="#E08E0B"
-RED="#E53935"; GREY="#9E9E9E"; INK="#243B2E"; PANEL="#0E3B2E"
-SKY0="#EAF5EC"; SKY1="#F7FBF6"; SOIL="#8D6E63"
-
-def state(v):
+# ---------- estado / colores (versión impresa, apagada) ----------
+GREEN="#2E7D32"; AMBER="#C77D14"; RED="#C0392B"; GREY="#9E9E9E"
+INK="#1e2b22"; SUB="#5c6b62"; RULE="#c9d4cc"
+def status(v):
     v=(v or "").strip().lower()
-    if v.startswith(("buen",)): return GREEN,"Buen estado"
+    if v.startswith("buen"): return GREEN,"Buen estado"
     if v.startswith("regular"): return AMBER,"Estado regular"
     if v.startswith("mal"): return RED,"Mal estado"
     if "poco" in v: return AMBER,"Poco simétrica"
     if "simétr" in v or "simetr" in v: return GREEN,"Simétrica"
     if "irregular" in v: return RED,"Irregular"
     return GREY,"No visible"
-
-def moda(comp):
-    c=collections.Counter(t["fito"][comp] for t in D.trees)
-    val,cnt=c.most_common(1)[0]
-    return val,cnt,round(100*cnt/D.n)
-
-M={c:moda(c) for c in ["Raíz","Fuste","Corteza","Ramas","Hojas","Cima","Copa"]}
-# stats puntuales
+def moda(c):
+    cc=collections.Counter(t["fito"][c] for t in D.trees); val,n=cc.most_common(1)[0]
+    return val,n,round(100*n/D.n)
+Mo={c:moda(c) for c in ["Raíz","Fuste","Corteza","Ramas","Hojas","Cima","Copa"]}
 fol=[float(t["follaje"]) for t in D.trees if t["follaje"]]
 htv=[float(t["ht"]) for t in D.trees if t["ht"]]; dv=[float(t["d"]) for t in D.trees if t["d"]]
-def top(field):
-    c=collections.Counter(t[field] for t in D.trees); v,n=c.most_common(1)[0]; return v,round(100*n/D.n)
-mad=top("madurez"); rec=top("rectitud"); esp=top("espacio")
+def topf(f):
+    cc=collections.Counter(t[f] for t in D.trees); v,n=cc.most_common(1)[0]; return v,round(100*n/D.n)
+mad=topf("madurez"); rec=topf("rectitud"); esp=topf("espacio")
 con=sum(1 for t in D.trees if t["familia"]=="Cupressaceae"); lat=D.n-con
 enf=list(D.enf_freq.items())[0]; pla=list(D.plaga_freq.items())[0]
 
-W,H=1240,1620
-cx=610
-
-# ---------- helpers ----------
+W,H=1400,1930
+cx=560                       # eje del árbol
+GY=1240                      # nivel del suelo
+S=[]
 def esc(s): return s.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;")
-def chip(x,y,titulo,val,pct,color,w=286,h=104,align="left"):
-    """Tarjeta de elemento."""
-    fill,lab=color
-    tx=x+22
-    return f'''
-  <g>
-    <rect x="{x}" y="{y}" rx="16" ry="16" width="{w}" height="{h}" fill="#ffffff" stroke="{fill}" stroke-width="2.5" filter="url(#sh)"/>
-    <rect x="{x}" y="{y}" rx="16" ry="16" width="12" height="{h}" fill="{fill}"/>
-    <circle cx="{x+40}" cy="{y+34}" r="13" fill="{fill}"/>
-    <text x="{x+64}" y="{y+40}" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="{INK}">{esc(titulo)}</text>
-    <text x="{x+22}" y="{y+72}" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="{fill}">{esc(lab)}</text>
-    <text x="{x+w-20}" y="{y+80}" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="{INK}">{pct}%</text>
-    <text x="{x+22}" y="{y+95}" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">{esc(val)}</text>
-  </g>'''
 
-def leader(x1,y1,x2,y2,color):
-    return f'<path d="M {x1},{y1} L {x2},{y2}" stroke="{color}" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/>' \
-           f'<circle cx="{x2}" cy="{y2}" r="6" fill="{color}"/>'
-
-# ---------- copa (forma intermedia conífera/latifoliada, simétrica) ----------
-apex=(cx,300)
-# path simétrico: ápice agudo (conífera) + copa ancha y redondeada (latifoliada)
-path=(f"M {cx},300 "
-      f"C {cx+80},330 {cx+150},400 {cx+160},485 "
-      f"C {cx+170},575 {cx+145},662 {cx+90},714 "
-      f"C {cx+55},746 {cx+30},766 {cx},792 "
-      f"C {cx-30},766 {cx-55},746 {cx-90},714 "
-      f"C {cx-145},662 {cx-170},575 {cx-160},485 "
-      f"C {cx-150},400 {cx-80},330 {cx},300 Z")
-
-copa_fill,copa_lab=state(M["Copa"][0])
-hojas_fill,_=state(M["Hojas"][0])
-cima_fill,_=state(M["Cima"][0])
-fuste_fill,_=state(M["Fuste"][0])
-corteza_fill,_=state(M["Corteza"][0])
-ramas_fill,_=state(M["Ramas"][0])
-raiz_fill,_=state(M["Raíz"][0])
-
-# ---------- SVG ----------
-svg=[]
-svg.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" font-family="Poppins,Segoe UI,Arial">')
-svg.append(f'''<defs>
- <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-   <stop offset="0" stop-color="{SKY0}"/><stop offset="1" stop-color="{SKY1}"/></linearGradient>
- <radialGradient id="crown" cx="0.42" cy="0.34" r="0.85">
-   <stop offset="0" stop-color="{GREEN_L}"/><stop offset="0.7" stop-color="{hojas_fill}"/>
-   <stop offset="1" stop-color="#1B5E20"/></radialGradient>
+S.append(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" font-family="Arial,Helvetica,sans-serif">')
+S.append(f'''<defs>
  <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0">
-   <stop offset="0" stop-color="{AMBER_D}"/><stop offset="0.5" stop-color="{fuste_fill}"/>
-   <stop offset="1" stop-color="{AMBER_D}"/></linearGradient>
- <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
-   <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#204030" flood-opacity="0.18"/></filter>
+  <stop offset="0" stop-color="#6b4a22"/><stop offset="0.28" stop-color="#946a30"/>
+  <stop offset="0.5" stop-color="#c79a55"/><stop offset="0.72" stop-color="#946a30"/>
+  <stop offset="1" stop-color="#5f4120"/></linearGradient>
+ <radialGradient id="canopy" cx="0.60" cy="0.30" r="0.85">
+  <stop offset="0" stop-color="#7cc47f"/><stop offset="0.5" stop-color="#4a9e50"/>
+  <stop offset="1" stop-color="#1f5f27"/></radialGradient>
+ <radialGradient id="soil" cx="0.5" cy="0.5" r="0.5">
+  <stop offset="0" stop-color="#00000022"/><stop offset="1" stop-color="#00000000"/></radialGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="1.1"/></filter>
 </defs>''')
-svg.append(f'<rect width="{W}" height="{H}" fill="url(#bg)"/>')
+S.append(f'<rect width="{W}" height="{H}" fill="#ffffff"/>')
 
-# encabezado
-svg.append(f'<text x="{W/2}" y="70" text-anchor="middle" font-size="42" font-weight="800" fill="{PANEL}">EL ÁRBOL PROMEDIO DE SARAGURO</text>')
-svg.append(f'<text x="{W/2}" y="108" text-anchor="middle" font-size="22" font-weight="600" fill="#3f6b52">Estado del arbolado urbano según la MODA de {D.n} árboles · Parque Central y Avenida El Oro · ArboLEC–UNL 2026</text>')
+# ---- título académico ----
+S.append(f'<text x="70" y="66" font-family="Georgia,\'Times New Roman\',serif" font-size="34" font-weight="700" fill="{INK}">Figura 1. Árbol tipo del arbolado urbano de Saraguro</text>')
+S.append(f'<text x="70" y="100" font-family="Georgia,serif" font-size="20" fill="{SUB}">Estado sanitario por componente según el valor más frecuente (moda) de n = {D.n} árboles · Inventario ArboLEC–UNL, 2026</text>')
+S.append(f'<line x1="70" y1="118" x2="{W-70}" y2="118" stroke="{RULE}" stroke-width="1.5"/>')
 
-# leyenda semáforo
-lx=W/2-360; ly=140
-items=[(GREEN,"Buen estado"),(AMBER,"Estado regular"),(RED,"Mal estado"),(GREY,"No visible")]
-svg.append(f'<rect x="{lx-20}" y="{ly-26}" rx="20" width="760" height="46" fill="#ffffff" stroke="#d6e4da" filter="url(#sh)"/>')
-step=185
-for i,(c,l) in enumerate(items):
-    xx=lx+i*step
-    svg.append(f'<circle cx="{xx}" cy="{ly-3}" r="11" fill="{c}"/><text x="{xx+20}" y="{ly+5}" font-size="20" font-weight="600" fill="{INK}">{l}</text>')
+# ---- leyenda semáforo (arriba derecha) ----
+lx,ly=W-470,150
+S.append(f'<rect x="{lx-16}" y="{ly-24}" width="452" height="120" rx="10" fill="#ffffff" stroke="{RULE}"/>')
+S.append(f'<text x="{lx}" y="{ly}" font-size="17" font-weight="700" fill="{INK}">Semáforo de estado (por componente)</text>')
+leg=[(GREEN,"Buen estado"),(AMBER,"Estado regular"),(RED,"Mal estado"),(GREY,"No visible / no evaluable")]
+for i,(c,l) in enumerate(leg):
+    yy=ly+26+(i//2)*30; xx=lx+(i%2)*230
+    S.append(f'<rect x="{xx}" y="{yy-13}" width="17" height="17" rx="3" fill="{c}"/><text x="{xx+26}" y="{yy}" font-size="16" fill="{INK}">{l}</text>')
 
-# ---- ESCENA ÁRBOL ----
-groundY=1200
-# suelo
-svg.append(f'<ellipse cx="{cx}" cy="{groundY}" rx="330" ry="26" fill="#dfeadf"/>')
-svg.append(f'<line x1="{cx-360}" y1="{groundY}" x2="{cx+360}" y2="{groundY}" stroke="#c2d3c4" stroke-width="3"/>')
+# ================= ÁRBOL =================
+# sombra en suelo
+S.append(f'<ellipse cx="{cx}" cy="{GY+6}" rx="300" ry="34" fill="url(#soil)"/>')
+S.append(f'<line x1="{cx-330}" y1="{GY}" x2="{cx+330}" y2="{GY}" stroke="#cfd8d0" stroke-width="2"/>')
 
-# raíces (moda: No visible -> translúcidas y punteadas)
-roots=[(-150,1360),(-70,1392),(10,1400),(90,1388),(168,1352)]
-rp=f'<g opacity="0.5">'
-for dx,ey in roots:
-    rp+=f'<path d="M {cx-26},{groundY-6} Q {cx+dx*0.4},{ (groundY+ey)/2 } {cx+dx},{ey}" stroke="{raiz_fill}" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="3,12"/>'
-rp+='</g>'
-svg.append(rp)
+# ---- raíces (moda No visible -> tenues, punteadas) ----
+raiz_c,_=status(Mo["Raíz"][0])
+S.append('<g opacity="0.42">')
+def root(x0,y0,ang,ln,wd,depth):
+    if depth==0 or ln<26: return
+    x1=x0+math.cos(ang)*ln; y1=y0+math.sin(ang)*ln
+    S.append(f'<path d="M {x0:.0f},{y0:.0f} Q {(x0+x1)/2+random.uniform(-8,8):.0f},{(y0+y1)/2:.0f} {x1:.0f},{y1:.0f}" stroke="{raiz_c}" stroke-width="{wd:.1f}" fill="none" stroke-linecap="round" stroke-dasharray="1,10"/>')
+    for k in (-1,1):
+        root(x1,y1,ang+k*random.uniform(0.25,0.5),ln*0.7,wd*0.65,depth-1)
+for a in (2.25,2.6,math.pi/2,2.85,0.9):  # abanico hacia abajo
+    root(cx,GY-4,a,92,14,3)
+S.append('</g>')
 
-# tronco (fuste ámbar) + corteza (contorno/estrías verdes)
-tx=22; bx=52
-svg.append(f'<path d="M {cx-tx},705 L {cx-bx},{groundY} L {cx+bx},{groundY} L {cx+tx},705 Z" fill="url(#trunk)" stroke="{corteza_fill}" stroke-width="5"/>')
-for off in (-26,-6,16,34):
-    svg.append(f'<path d="M {cx+off*0.5},720 C {cx+off},900 {cx+off*1.2},1050 {cx+off*1.3},{groundY-10}" stroke="{corteza_fill}" stroke-width="2.2" fill="none" opacity="0.55"/>')
+# ---- ramas (moda Regular -> ámbar) detrás de la copa ----
+ramas_c,_=status(Mo["Ramas"][0])
+brtips=[]
+def branch(x0,y0,ang,ln,wd,depth):
+    if depth==0 or ln<24: return
+    x1=x0+math.cos(ang)*ln; y1=y0+math.sin(ang)*ln
+    S.append(f'<path d="M {x0:.0f},{y0:.0f} Q {(x0+x1)/2+random.uniform(-10,10):.0f},{(y0+y1)/2-14:.0f} {x1:.0f},{y1:.0f}" stroke="url(#trunk)" stroke-width="{wd:.1f}" fill="none" stroke-linecap="round"/>')
+    if depth<=2: brtips.append((x1,y1))
+    for k in (-1,1):
+        branch(x1,y1,ang-math.pi/2*0 + (ang if False else ang)+k*random.uniform(0.34,0.6)-0, ln*0.72, wd*0.62, depth-1)
+# tronco recto (moda Recto) con ramas simétricas
+random.seed(11)
+for (yb,spread) in [(792,0.62),(700,0.5)]:
+    for k in (-1,1):
+        branch(cx+k*10, yb, -math.pi/2 + k*spread, 150, 18, 3)
+# rama central sube
+branch(cx,760,-math.pi/2,120,20,3)
 
-# ramas (ámbar) — dos ramas simétricas que salen del fuste y entran en la copa
-svg.append(f'<path d="M {cx-28},852 C {cx-70,816} {cx-105,776} {cx-120,742}" stroke="{ramas_fill}" stroke-width="14" fill="none" stroke-linecap="round"/>')
-svg.append(f'<path d="M {cx+28},852 C {cx+70,816} {cx+105,776} {cx+120,742}" stroke="{ramas_fill}" stroke-width="14" fill="none" stroke-linecap="round"/>')
+# ---- tronco (moda Fuste Regular -> ámbar) ----
+fuste_c,_=status(Mo["Fuste"][0])
+tw,bw=26,64
+S.append(f'<path d="M {cx-tw},790 '
+         f'C {cx-tw-6},980 {cx-bw+18},1130 {cx-bw},{GY} '
+         f'Q {cx-bw-30},{GY+6} {cx-bw-46},{GY+10} '     # contrafuerte izq
+         f'L {cx+bw+46},{GY+10} Q {cx+bw+30},{GY+6} {cx+bw},{GY} '
+         f'C {cx+bw-18},1130 {cx+tw+6},980 {cx+tw},790 Z" '
+         f'fill="url(#trunk)" stroke="#4f3617" stroke-width="2"/>')
+# corteza (moda Buena -> textura + acento verde): estrías
+corteza_c,_=status(Mo["Corteza"][0])
+random.seed(3)
+for i in range(9):
+    off=random.uniform(-bw*0.7,bw*0.7)
+    S.append(f'<path d="M {cx+off*0.4:.0f},812 C {cx+off:.0f},1000 {cx+off*1.15:.0f},1120 {cx+off*1.2:.0f},{GY-8}" stroke="#5f4120" stroke-width="{random.uniform(1.4,2.8):.1f}" fill="none" opacity="0.5"/>')
 
-# copa (relleno hojas, contorno = estado copa)
-svg.append(f'<path d="{path}" fill="url(#crown)" stroke="{copa_fill}" stroke-width="6"/>')
-# textura hojas (puntos claros)
-import math
-dots=""
-for i in range(46):
-    a=(i*137.5)*math.pi/180; r=40+ (i%7)*24
-    px=cx+math.cos(a)*r*1.5; py=540+math.sin(a)*r*1.3
-    if 320<py<760: dots+=f'<circle cx="{px:.0f}" cy="{py:.0f}" r="5.5" fill="#ffffff" opacity="0.12"/>'
-svg.append(dots)
+# ---- copa: forma intermedia (elipse latifoliada + espiga conífera), simétrica ----
+cyc,rx,ry=620,250,285; apexY=318
+# base con degradado
+S.append(f'<ellipse cx="{cx}" cy="{cyc}" rx="{rx}" ry="{ry}" fill="url(#canopy)"/>')
+S.append(f'<path d="M {cx},{apexY} C {cx+70},{apexY+70} {cx+95},{cyc-ry+40} {cx+60},{cyc-ry+70} L {cx-60},{cyc-ry+70} C {cx-95},{cyc-ry+40} {cx-70},{apexY+70} {cx},{apexY} Z" fill="url(#canopy)"/>')
+# follaje texturizado (simétrico: se genera mitad derecha y se refleja)
+def leafcolor(ny):  # ny: -1 arriba .. 1 abajo
+    t=(ny+1)/2
+    stops=[(120,188,126),(104,178,110),(82,164,88),(58,144,66),(42,118,50),(28,94,36)]
+    idx=min(len(stops)-1,int(t*len(stops)))
+    r,g,b=stops[idx]; j=random.randint(-8,8)
+    return f'rgb({max(0,min(255,r+j))},{max(0,min(255,g+j))},{max(0,min(255,b+j))})'
+random.seed(21)
+blobs=[]
+n=0; att=0
+while n<115 and att<6000:
+    att+=1
+    x=random.uniform(cx,cx+rx); y=random.uniform(cyc-ry,cyc+ry)
+    nx=(x-cx)/rx; ny=(y-cyc)/ry
+    if nx*nx+ny*ny<=0.98:
+        blobs.append((x,y)); n+=1
+# espiga superior
+for _ in range(20):
+    y=random.uniform(apexY+6,cyc-ry+80); mh=70*((y-apexY)/(cyc-ry+80-apexY))
+    blobs.append((random.uniform(cx,cx+max(6,mh)),y))
+# dibujar: sombra (grande, oscuro) detrás; luego hoja
+layer=""
+for (x,y) in blobs:
+    ny=(y-cyc)/ry
+    for (dx,mult,op) in [(0,1.0,0.9)]:
+        r=random.uniform(20,40)
+        for sx in (x,2*cx-x):  # reflejo simetría
+            layer+=f'<circle cx="{sx:.0f}" cy="{y:.0f}" r="{r:.0f}" fill="{leafcolor(ny)}" opacity="0.88"/>'
+S.append(layer)
+# realces (luz arriba-derecha) y sombra (abajo-izq)
+random.seed(5); hl=""
+for _ in range(14):
+    x=random.uniform(cx+20,cx+rx*0.8); y=random.uniform(cyc-ry*0.8,cyc-20)
+    if ((x-cx)/rx)**2+((y-cyc)/ry)**2<=0.75:
+        hl+=f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{random.uniform(9,18):.0f}" fill="#bfe0c0" opacity="0.15"/>'
+for _ in range(22):
+    x=random.uniform(cx-rx*0.8,cx-20); y=random.uniform(cyc,cyc+ry*0.8)
+    if ((x-cx)/rx)**2+((y-cyc)/ry)**2<=0.85:
+        hl+=f'<circle cx="{x:.0f}" cy="{y:.0f}" r="{random.uniform(12,26):.0f}" fill="#14400f" opacity="0.20"/>'
+S.append(hl)
 
-# cima (ápice) marcador
-svg.append(f'<circle cx="{apex[0]}" cy="{apex[1]}" r="15" fill="{cima_fill}" stroke="#fff" stroke-width="4"/>')
-svg.append(f'<path d="M {apex[0]},{apex[1]-40} l 7,20 -14,0 z" fill="{cima_fill}"/>')
+# ---- cima (moda Buena -> verde): ápice destacado ----
+cima_c,_=status(Mo["Cima"][0])
+S.append(f'<path d="M {cx},{apexY-30} L {cx-9},{apexY} L {cx+9},{apexY} Z" fill="#1f5f27"/>')
+S.append(f'<circle cx="{cx}" cy="{apexY-2}" r="10" fill="{cima_c}" stroke="#fff" stroke-width="3"/>')
 
-# ---- CALLOUTS ----
-def M3(c): v,cnt,pct=M[c]; return v,cnt,pct
+# ================= ANOTACIONES =================
+def label(ax,ay,tx,ty,name,state_val,anchor="start"):
+    col,lab=status(state_val[0]); pct=state_val[2]; cnt=state_val[1]
+    S.append(f'<circle cx="{ax}" cy="{ay}" r="6" fill="{col}"/>')
+    S.append(f'<path d="M {ax},{ay} L {tx},{ty}" stroke="#98a79d" stroke-width="1.6" fill="none"/>')
+    ex = tx if anchor=="start" else tx
+    le = 250
+    x0 = tx if anchor=="start" else tx-le
+    S.append(f'<line x1="{tx}" y1="{ty}" x2="{tx+(le if anchor=="start" else -le)}" y2="{ty}" stroke="#98a79d" stroke-width="1.6"/>')
+    S.append(f'<rect x="{(tx if anchor=="start" else tx-le)}" y="{ty-30}" width="7" height="60" fill="{col}"/>')
+    tx2 = tx+16 if anchor=="start" else tx-le+16
+    an = "start"
+    S.append(f'<text x="{tx2}" y="{ty-6}" text-anchor="{an}" font-size="24" font-weight="700" fill="{INK}">{esc(name)}</text>')
+    S.append(f'<text x="{tx2}" y="{ty+20}" text-anchor="{an}" font-size="18" fill="{col}" font-weight="600">{esc(lab)} · {pct}% ({cnt}/{D.n})</text>')
+
+# izquierda (anchor end): línea horizontal hacia la izquierda desde tx
+def label_L(ax,ay,tx,ty,name,sv):
+    col,lab=status(sv[0]); pct=sv[2]; cnt=sv[1]; le=252
+    S.append(f'<circle cx="{ax}" cy="{ay}" r="6" fill="{col}"/>')
+    S.append(f'<path d="M {ax},{ay} L {tx},{ty}" stroke="#98a79d" stroke-width="1.6"/>')
+    S.append(f'<line x1="{tx}" y1="{ty}" x2="{tx-le}" y2="{ty}" stroke="#98a79d" stroke-width="1.6"/>')
+    S.append(f'<rect x="{tx-le}" y="{ty-30}" width="7" height="60" fill="{col}"/>')
+    S.append(f'<text x="{tx-le+16}" y="{ty-6}" font-size="24" font-weight="700" fill="{INK}">{esc(name)}</text>')
+    S.append(f'<text x="{tx-le+16}" y="{ty+20}" font-size="18" fill="{col}" font-weight="600">{esc(lab)} · {pct}% ({cnt}/{D.n})</text>')
+def label_R(ax,ay,tx,ty,name,sv):
+    col,lab=status(sv[0]); pct=sv[2]; cnt=sv[1]; le=252
+    S.append(f'<circle cx="{ax}" cy="{ay}" r="6" fill="{col}"/>')
+    S.append(f'<path d="M {ax},{ay} L {tx},{ty}" stroke="#98a79d" stroke-width="1.6"/>')
+    S.append(f'<line x1="{tx}" y1="{ty}" x2="{tx+le}" y2="{ty}" stroke="#98a79d" stroke-width="1.6"/>')
+    S.append(f'<rect x="{tx}" y="{ty-30}" width="7" height="60" fill="{col}"/>')
+    S.append(f'<text x="{tx+16}" y="{ty-6}" font-size="24" font-weight="700" fill="{INK}">{esc(name)}</text>')
+    S.append(f'<text x="{tx+16}" y="{ty+20}" font-size="18" fill="{col}" font-weight="600">{esc(lab)} · {pct}% ({cnt}/{D.n})</text>')
+
 # izquierda
-c="Cima"; v,cnt,pct=M3(c)
-svg.append(leader(320,262,apex[0]-14,apex[1],cima_fill)); svg.append(chip(20,214,"Cima",f"{cnt}/{D.n} árboles · punta de copa",pct,state(v)))
-c="Copa"; v,cnt,pct=M3(c)
-svg.append(leader(320,470,cx-150,470,copa_fill)); svg.append(chip(20,420,"Copa",f"{cnt}/{D.n} · forma dominante",pct,state(v)))
-c="Hojas"; v,cnt,pct=M3(c)
-svg.append(leader(320,634,cx-70,590,hojas_fill)); svg.append(chip(20,590,"Hojas",f"{cnt}/{D.n} · follaje medio {round(sum(fol)/len(fol))}%",pct,state(v)))
+label_L(cx-6,apexY-2, 300,360, "Cima", Mo["Cima"])
+label_L(cx-rx*0.72,cyc-70, 300,560, "Copa", Mo["Copa"])
+label_L(cx-rx*0.5,cyc+80, 300,720, "Hojas", Mo["Hojas"])
 # derecha
-c="Ramas"; v,cnt,pct=M3(c)
-svg.append(leader(W-320,470,cx+96,800,ramas_fill)); svg.append(chip(W-306,420,"Ramas",f"{cnt}/{D.n} árboles",pct,state(v)))
-c="Corteza"; v,cnt,pct=M3(c)
-svg.append(leader(W-320,770,cx+bx-6,900,corteza_fill)); svg.append(chip(W-306,720,"Corteza",f"{cnt}/{D.n} árboles",pct,state(v)))
-c="Fuste"; v,cnt,pct=M3(c)
-svg.append(leader(W-320,980,cx+30,1010,fuste_fill)); svg.append(chip(W-306,930,"Fuste",f"{cnt}/{D.n} · tronco principal",pct,state(v)))
-# raíz (abajo izquierda)
-c="Raíz"; v,cnt,pct=M3(c)
-svg.append(leader(320,1300,cx-70,1360,raiz_fill)); svg.append(chip(20,1250,"Raíz",f"{cnt}/{D.n} · no evaluable a simple vista",pct,state(v)))
+label_R(cx+150,700, W-300,500, "Ramas", Mo["Ramas"])
+label_R(cx+bw-6,1030, W-300,720, "Corteza", Mo["Corteza"])
+label_R(cx+22,1140, W-300,940, "Fuste", Mo["Fuste"])
+# raíz (abajo izq)
+label_L(cx-70,GY+90, 300,1150, "Raíz", Mo["Raíz"])
 
-# nota forma intermedia
-svg.append(f'<g><rect x="{W-306}" y="1170" rx="14" width="286" height="150" fill="#ffffff" stroke="#d6e4da" filter="url(#sh)"/>'
-           f'<text x="{W-288}" y="1205" font-size="22" font-weight="700" fill="{PANEL}">Forma intermedia</text>'
-           f'<text x="{W-288}" y="1236" font-size="16.5" fill="#3f6b52">Conífera + latifoliada:</text>'
-           f'<text x="{W-288}" y="1262" font-size="16.5" fill="{INK}">{con} coníferas (ápice agudo)</text>'
-           f'<text x="{W-288}" y="1288" font-size="16.5" fill="{INK}">{lat} latifoliadas (copa ancha)</text>'
-           f'<text x="{W-288}" y="1312" font-size="14.5" fill="#6b7d72">→ silueta combinada</text></g>')
+# nota forma + follaje (recuadro discreto abajo-derecha del árbol)
+nx,ny=W-300,1080
+S.append(f'<text x="{nx-252+16}" y="{ny}" font-size="17" font-weight="700" fill="{INK}">Forma: intermedia</text>')
+S.append(f'<text x="{nx-252+16}" y="{ny+24}" font-size="15" fill="{SUB}">{con} coníferas + {lat} latifoliadas</text>')
+S.append(f'<text x="{nx-252+16}" y="{ny+46}" font-size="15" fill="{SUB}">ápice agudo + copa ancha</text>')
 
-# ---- PANEL DATOS PUNTUALES ----
-py=1360
-svg.append(f'<rect x="30" y="{py}" rx="22" width="{W-60}" height="228" fill="{PANEL}"/>')
-svg.append(f'<text x="60" y="{py+44}" font-size="24" font-weight="800" fill="#EAF5EC">DATOS PUNTUALES DEL ARBOLADO (n={D.n})</text>')
-tiles=[("Altura media",f"{sum(htv)/len(htv):.1f} m","rango 2,7–27,1"),
-       ("Diámetro medio",f"{sum(dv)/len(dv):.0f} cm","rango 1–126"),
-       ("Follaje medio",f"{round(sum(fol)/len(fol))}%","densidad de copa"),
-       ("Madurez",f"{mad[0]}",f"{mad[1]}% de los árboles"),
-       ("Porte del fuste",f"{rec[0]}",f"{rec[1]}% (moda)"),
-       ("Espacio",f"{esp[0]}",f"{esp[1]}% (moda)"),
-       ("Afección + común","Decoloración",f"de hojas · {round(100*enf[1]/D.n)}%"),
-       ("Agente + común","Epífitas",f"{round(100*pla[1]/D.n)}% (líquenes)"),
-       ("Veredicto global","1 derribo",f"{D.n_int} interv. · {D.n_cons} conservar")]
-cols=5; tw=(W-60-40)/cols; ty=py+70
-for i,(t,big,sub) in enumerate(tiles):
-    col=i%cols; rowi=i//cols
-    x=60+col*tw; yy=ty+rowi*78
-    svg.append(f'<text x="{x}" y="{yy}" font-size="15.5" font-weight="600" fill="#9cccb0">{esc(t)}</text>')
-    svg.append(f'<text x="{x}" y="{yy+30}" font-size="27" font-weight="800" fill="#ffffff">{esc(big)}</text>')
-    svg.append(f'<text x="{x}" y="{yy+50}" font-size="13.5" fill="#7fae94">{esc(sub)}</text>')
+# ================= TABLA DE DATOS =================
+ty0=1548
+S.append(f'<text x="70" y="{ty0}" font-family="Georgia,serif" font-size="22" font-weight="700" fill="{INK}">Parámetros dendrométricos y estructurales del arbolado (n = {D.n})</text>')
+S.append(f'<line x1="70" y1="{ty0+14}" x2="{W-70}" y2="{ty0+14}" stroke="{INK}" stroke-width="1.5"/>')
+data=[("Altura total media",("%.1f m"%(sum(htv)/len(htv))).replace(".",","),"rango 2,7 – 27,1 m"),
+      ("Diámetro medio (DAP)",f"{sum(dv)/len(dv):.0f} cm","rango 1 – 126 cm"),
+      ("Follaje medio",f"{round(sum(fol)/len(fol))} %","densidad de copa"),
+      ("Madurez dominante",f"{mad[0]}",f"{mad[1]} % de los individuos"),
+      ("Porte del fuste (moda)",f"{rec[0]}",f"{rec[1]} %"),
+      ("Espacio de crecimiento",f"{esp[0]}",f"{esp[1]} % (moda)"),
+      ("Enfermedad más frecuente","Decoloración de hojas",f"{round(100*enf[1]/D.n)} % de árboles"),
+      ("Agente más frecuente","Epífitas / líquenes",f"{round(100*pla[1]/D.n)} % de árboles"),
+      ("Veredicto técnico global","1 derribo",f"{D.n_int} con intervención · {D.n_cons} conservar")]
+cols=3; colw=(W-140)/cols; rowh=88
+for i,(t,big,sub) in enumerate(data):
+    c=i%cols; r=i//cols; x=70+c*colw; y=ty0+50+r*rowh
+    S.append(f'<text x="{x}" y="{y}" font-size="15" font-weight="600" fill="{SUB}">{esc(t.upper())}</text>')
+    S.append(f'<text x="{x}" y="{y+30}" font-size="26" font-weight="700" fill="{INK}">{esc(big)}</text>')
+    S.append(f'<text x="{x}" y="{y+52}" font-size="14.5" fill="{SUB}">{esc(sub)}</text>')
+    if c<cols-1: S.append(f'<line x1="{x+colw-24}" y1="{y-22}" x2="{x+colw-24}" y2="{y+58}" stroke="{RULE}" stroke-width="1"/>')
+    if r>0 and c==0: S.append(f'<line x1="70" y1="{y-42}" x2="{W-70}" y2="{y-42}" stroke="{RULE}" stroke-width="1"/>')
 
-svg.append(f'<text x="{W/2}" y="{H-14}" text-anchor="middle" font-size="15" fill="#6b7d72">Cada elemento refleja el valor más frecuente (moda) entre los {D.n} árboles inventariados. Semáforo: verde = bueno · ámbar = regular · rojo = malo · gris = no visible.</text>')
-svg.append('</svg>')
+S.append(f'<text x="70" y="{H-26}" font-size="14.5" fill="{SUB}">Cada componente del árbol se representa con el estado más frecuente (moda) entre los {D.n} árboles inventariados; la raíz se muestra atenuada por no ser evaluable a simple vista (70 %).</text>')
+S.append('</svg>')
 
-open(OUT_SVG,"w",encoding="utf-8").write("\n".join(svg))
+open(OUT_SVG,"w",encoding="utf-8").write("\n".join(S))
 print("SVG:",OUT_SVG)
-for c in M: print(c, M[c])
+for c in Mo: print(c,Mo[c],"->",status(Mo[c][0])[1])
