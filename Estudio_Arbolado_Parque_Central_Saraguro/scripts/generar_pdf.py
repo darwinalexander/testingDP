@@ -145,22 +145,88 @@ def build_report(path):
     E+=[P("Distribución del riesgo total:",S("b",fontName="Helvetica-Bold",fontSize=10)),t2,
         P("Nota: el riesgo total integra todos los factores, incluido el daño de raíces a la infraestructura; por ello varios árboles estructuralmente sanos figuran en riesgo «Alto» sin ser candidatos a derribo.",S("i",fontSize=8.5,textColor=GRIS,leading=11)),
         PageBreak()]
-    # 5 CAÍDA
+    # 5 SALUD / ESTADO FITOSANITARIO
+    h2s=S("h2",fontName="Helvetica-Bold",fontSize=12,textColor=VERDE,spaceBefore=8,spaceAfter=4)
+    FITO_FILL={"buena":VER_F,"regular":NAR_F,"mala":ROJO_F,"na":PH_BG}
+    def fito_fill(v): return FITO_FILL[D.fito_color_key(v)]
+    E+=[P("5. Salud y estado fitosanitario del arbolado",h1),
+        P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) <b>estado fitosanitario</b> de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) <b>presencia de enfermedades</b>; (iii) <b>ubicación de las enfermedades</b>; (iv) <b>presencia de plagas</b>; y (v) <b>ubicación de las plagas</b>. El detalle por árbol se presenta en la ficha de salud (5.4)."),
+        P("5.1. Estado fitosanitario por componente",h2s)]
+    fh=[header_cells(["Componente","Buena/Bueno","Regular","Mala/Malo","No visible/NA"])]
+    for comp in D.FITO_COMPONENTS:
+        d=D.fito_summary[comp]
+        fh.append([P(comp,cellst),P(str(d["Buena/Bueno"]),cellc),P(str(d["Regular"]),cellc),P(str(d["Mala/Malo"]),cellc),P(str(d["No visible/NA"]),cellc)])
+    tfito=Table(fh,colWidths=[3.5*cm,3*cm,2.6*cm,2.6*cm,3*cm])
+    tfito.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),HDR),("GRID",(0,0),(-1,-1),0.4,colors.grey),
+        ("VALIGN",(0,0),(-1,-1),"MIDDLE"),("TEXTCOLOR",(1,1),(1,-1),VERDE),("TEXTCOLOR",(3,1),(3,-1),ROJO),
+        ("FONTNAME",(1,1),(1,-1),"Helvetica-Bold"),("FONTNAME",(3,1),(3,-1),"Helvetica-Bold")]))
+    E+=[tfito,
+        P("Lectura: la mayoría de los componentes están en estado Bueno o Regular; los estados «Malo» se concentran en pocos árboles (ver 5.4) y orientan las intervenciones de poda sanitaria, tratamiento y —donde hay pudrición o raíz comprometida— evaluación estructural.",S("i",fontSize=8.5,textColor=GRIS,leading=11)),
+        P("5.2. Presencia de enfermedades",h2s)]
+    eh=[header_cells(["Enfermedad","N° de árboles","% del total"])]
+    for k,v in D.enf_freq.items(): eh.append([P(k,cellst),P(str(v),cellc),P("%.0f%%"%(100*v/D.n),cellc)])
+    if len(eh)==1: eh.append([P("Sin registros",cellst),P("0",cellc),P("0%",cellc)])
+    tenf=Table(eh,colWidths=[7*cm,3*cm,3*cm]); tenf.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),HDR),
+        ("GRID",(0,0),(-1,-1),0.4,colors.grey),("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+        ("ROWBACKGROUNDS",(0,1),(-1,-1),[colors.white,colors.HexColor("#F3F7F3")])]))
+    E+=[tenf, P("5.3. Presencia de plagas",h2s)]
+    ph=[header_cells(["Plaga / agente","N° de árboles","% del total"])]
+    for k,v in D.plaga_freq.items(): ph.append([P(k,cellst),P(str(v),cellc),P("%.0f%%"%(100*v/D.n),cellc)])
+    if len(ph)==1: ph.append([P("Sin registros",cellst),P("0",cellc),P("0%",cellc)])
+    tpl=Table(ph,colWidths=[7*cm,3*cm,3*cm]); tpl.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),HDR),
+        ("GRID",(0,0),(-1,-1),0.4,colors.grey),("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+        ("ROWBACKGROUNDS",(0,1),(-1,-1),[colors.white,colors.HexColor("#F3F7F3")])]))
+    E+=[tpl,
+        P("La afección más frecuente es la decoloración de hojas y, entre los agentes, las epífitas y líquenes —de bajo impacto estructural, manejables con poda sanitaria y control de epífitas—. Las enfermedades estructuralmente relevantes (pudrición) son escasas pero decisivas para la seguridad (ver abajo).",S("cap2",fontSize=9,leading=12)),
+        P("5.4. Casos de atención estructural (prioridad de seguridad)",h2s),
+        bullets([
+            "<b>A06</b> (ciprés común): riesgo de caída Alto → DERRIBO (Sección 7). Es el único con este nivel.",
+            "<b>AV02</b> (molle) y <b>A25</b> (arabisco): PUDRICIÓN DEL TRONCO. Requieren evaluación instrumental del fuste (resistógrafo/tomografía) y monitoreo; reevaluar derribo si el defecto progresa.",
+            "<b>A07</b> (ciprés vela) y <b>AV04</b> (acacia): RAÍZ en mal estado → puntos críticos de anclaje. Inspección radicular y monitoreo prioritario.",
+            "<b>A04</b> (ciprés vela): fuste en mal estado con pudrición de ramas y afección fitosanitaria; poda sanitaria y tratamiento (su riesgo de caída es Bajo por el porte moderado).",]),
+        NextPageTemplate("land"),PageBreak()]
+    # 5.4 tabla de salud por árbol (landscape)
+    E+=[P("5.5. Ficha de salud por árbol",h1),
+        P("Estado fitosanitario por componente (verde = bueno · naranja = regular · rojo = malo · gris = no visible/NA) y presencia/ubicación de enfermedades y plagas.",small)]
+    hh=["ID","Especie (común)","Raíz","Fuste","Corteza","Ramas","Hojas","Cima","Copa","Enfermedades (ubicación)","Plagas (ubicación)"]
+    dd=[header_cells(hh)]
+    hstyl=[("BACKGROUND",(0,0),(-1,0),HDR),("GRID",(0,0),(-1,-1),0.4,colors.grey),("VALIGN",(0,0),(-1,-1),"MIDDLE"),
+           ("TOPPADDING",(0,0),(-1,-1),1.5),("BOTTOMPADDING",(0,0),(-1,-1),1.5)]
+    ri=1
+    for grp_label,grp in [("PARQUE CENTRAL",D.parque),("AVENIDA EL ORO (fuera del parque)",D.avenida)]:
+        dd.append([P("<b>%s</b>"%grp_label,S("g",fontName="Helvetica-Bold",fontSize=7.5,textColor=colors.white))]+[P("")]*10)
+        hstyl.append(("BACKGROUND",(0,ri),(-1,ri),colors.HexColor("#37474F"))); hstyl.append(("SPAN",(0,ri),(-1,ri))); ri+=1
+        for t in grp:
+            enf=", ".join(t["enfermedades"]) or "—"
+            if t["ubic_enf"]: enf+="  · ubic: "+", ".join(t["ubic_enf"])
+            pl=", ".join(t["plagas"]) or "—"
+            if t["ubic_plaga"]: pl+="  · ubic: "+", ".join(t["ubic_plaga"])
+            row=[P(t["id"],cellc),P("%s (%s)"%(t["especie"],t["comun"]),cellst)]
+            row+=[P(t["fito"][c],cellc) for c in D.FITO_COMPONENTS]
+            row+=[P(enf,cellst),P(pl,cellst)]
+            dd.append(row)
+            for ci,c in enumerate(D.FITO_COMPONENTS):
+                hstyl.append(("BACKGROUND",(2+ci,ri),(2+ci,ri),fito_fill(t["fito"][c])))
+            ri+=1
+    thealth=Table(dd,colWidths=[1.0*cm,3.5*cm,1.35*cm,1.35*cm,1.4*cm,1.4*cm,1.35*cm,1.3*cm,1.55*cm,6.1*cm,4.9*cm],repeatRows=1)
+    thealth.setStyle(TableStyle(hstyl))
+    E+=[Spacer(1,4),thealth,NextPageTemplate("portrait"),PageBreak()]
+    # 6 CAÍDA
     d3=[header_cells(["Riesgo de caída","N°","%"])]
     for lvl in ["Alto","Medio","Bajo"]: d3.append([P(lvl,cellc),P(str(D.caida_counts[lvl]),cellc),P("%.0f%%"%(100*D.caida_counts[lvl]/D.n),cellc)])
     t3=Table(d3,colWidths=[4.5*cm,2*cm,2*cm])
     stl3=[("BACKGROUND",(0,0),(-1,0),HDR),("GRID",(0,0),(-1,-1),0.4,colors.grey),("VALIGN",(0,0),(-1,-1),"MIDDLE")]
     for i,lvl in enumerate(["Alto","Medio","Bajo"],1): stl3.append(("TEXTCOLOR",(0,i),(0,i),RC[lvl]))
     t3.setStyle(TableStyle(stl3))
-    E+=[P("5. Análisis del riesgo de caída (énfasis)",h1),
+    E+=[P("6. Análisis del riesgo de caída (énfasis)",h1),
         P("El riesgo de caída es el criterio central por su relación directa con la seguridad de las personas. Distribución obtenida:"),
         t3,Spacer(1,6),
-        P("<b>Hallazgo principal.</b> De los %d árboles, UN (1) solo individuo presenta riesgo de caída ALTO: el ciprés común A06 (código %s, ref. «%s»), único con recomendación de DERRIBO en campo. Catorce (14) árboles presentan caída Media —manejables con poda de reequilibrio, tratamiento y vigilancia— y trece (13) caída Baja."%(D.n,D.DERRIBO_TREE['codigo'],D.DERRIBO_TREE['ref'])),
+        P("<b>Hallazgo principal.</b> De los %d árboles, UN (1) solo individuo presenta riesgo de caída ALTO: el ciprés común A06 (código %s, ref. «%s»), único con recomendación de DERRIBO en campo. %d árboles presentan caída Media —manejables con poda de reequilibrio, tratamiento y vigilancia— y %d caída Baja."%(D.n,D.DERRIBO_TREE['codigo'],D.DERRIBO_TREE['ref'],D.caida_counts['Medio'],D.caida_counts['Bajo'])),
         P("Este resultado es determinante: aunque el %.0f%% del arbolado figura en riesgo total «Alto», ese nivel se asocia mayoritariamente a fustes inclinados y a daños de raíces sobre el adoquinado y el concreto —el problema que motivó la solicitud— y NO a una probabilidad real de volcamiento. Se establecen como árboles de VIGILANCIA por sus defectos estructurales: A07 (raíz en mal estado, 17,8 m), A14 y A20 (fustes muy inclinados) y, en la avenida, AV02 (pudrición del tronco en un molle) y AV04 (acacia vieja con raíz y fuste en mal estado)."%(100*D.risk_counts['Alto']/D.n)),
         P("<b>Recomendación de método:</b> para A06, y ante dudas sobre ejemplares de gran porte o con pudrición (AV02, AV04), se aconseja confirmar el diagnóstico con evaluación instrumental (resistógrafo o tomografía sónica) antes de cualquier decisión de derribo."),
         PageBreak()]
     # 6 CIPRESES
-    E+=[P("6. Análisis individual de los cipreses",h1),
+    E+=[P("7. Análisis individual de los cipreses",h1),
         P("Atendiendo a la preocupación del Municipio y al valor patrimonial de estas especies, se analiza cada uno de los %d cipreses (4 <i>Cupressus sempervirens</i> — ciprés vela; 3 <i>Hesperocyparis macrocarpa</i> — ciprés común). Ambas especies son introducidas (Mediterráneo y California); su valor es cultural, histórico y paisajístico —reconocido aquí— más que estrictamente ecológico. Bajo la ficha de cada uno se reserva espacio para tres fotografías y se indica su dirección en ArboLEC."%len(D.cupres))]
     for t in D.cupres:
         rows=[
@@ -186,7 +252,7 @@ def build_report(path):
     E+=[P("<b>Síntesis de los cipreses:</b> de los %d cipreses se recomienda el derribo de UNO (A06) por riesgo de caída alto y alta exposición; los %d restantes se CONSERVAN con poda sanitaria, manejo de epífitas, tratamiento de daños mecánicos, retiro de clavos/alambres y, en A07, monitoreo prioritario del anclaje."%(len(D.cupres),len(D.cupres)-1)),
         NextPageTemplate("land"),PageBreak()]
     # 7 VEREDICTO (landscape)
-    E+=[P("7. Tabla resumen: conservación vs. derribo (todo el inventario)",h1),
+    E+=[P("8. Tabla resumen: conservación vs. derribo (todo el inventario)",h1),
         P("Código de color: rojo = Derribo; naranja = Conservar con intervención; verde = Conservar. De los %d árboles: %d derribo, %d conservación con intervención y %d conservación con mantenimiento ordinario."%(D.n,D.n_derribo,D.n_int,D.n_cons),small)]
     dd=[header_cells(["ID","Especie (común)","Sitio","Ref.","D (cm)","H (m)","Riesgo total","Caída","VEREDICTO","Fundamento"])]
     styl=[("BACKGROUND",(0,0),(-1,0),HDR),("GRID",(0,0),(-1,-1),0.4,colors.grey),("VALIGN",(0,0),(-1,-1),"MIDDLE"),
@@ -206,7 +272,7 @@ def build_report(path):
     tv.setStyle(TableStyle(styl))
     E+=[Spacer(1,4),tv,NextPageTemplate("portrait"),PageBreak()]
     # 8 FOTOS
-    E+=[P("8. Registro fotográfico por árbol",h1),
+    E+=[P("9. Registro fotográfico por árbol",h1),
         P('Las fotografías de cada árbol están publicadas en la plataforma ArboLEC junto con su ficha completa; se indica la dirección URL individual y se reserva espacio para tres fotografías por árbol, a insertar en la versión final del expediente municipal.'),Spacer(1,4)]
     for grp_label,grp in [("PARQUE CENTRAL",D.parque),("AVENIDA EL ORO (fuera del parque)",D.avenida)]:
         E.append(P(grp_label,S("g8",fontName="Helvetica-Bold",fontSize=11,textColor=AZUL,spaceBefore=6,spaceAfter=4)))
@@ -218,7 +284,7 @@ def build_report(path):
                 catcol.hexval(),CAT[t["cat"]],t["url"],t["url"]),S("info",fontSize=8.5,leading=11.5))
             E.append(KeepTogether([info,Spacer(1,2),photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],h=2.7*cm,tid=t["id"]),Spacer(1,8)]))
     # 9 CONCLUSIONES
-    E+=[PageBreak(),P("9. Conclusiones y recomendaciones",h1),
+    E+=[PageBreak(),P("10. Conclusiones y recomendaciones",h1),
         P("Conclusiones:",S("b",fontName="Helvetica-Bold",fontSize=10.5)),
         bullets([
             "Se evaluaron %d árboles (%d en el Parque Central y %d en la Avenida El Oro) de %d especies; la familia de los cipreses es la dominante y de mayor valor patrimonial."%(D.n,D.n_parque,D.n_av,len(D.species)),
