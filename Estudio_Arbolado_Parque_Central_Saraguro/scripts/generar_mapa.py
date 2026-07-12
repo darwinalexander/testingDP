@@ -116,8 +116,10 @@ for cat in ["CONSERVAR","CONSERVAR-INT","DERRIBO"]:
                    edgecolors="white", linewidths=1.6, zorder=5, marker=("v" if cat=="DERRIBO" else "o"))
 for t in pts:
     px, py = X(float(t["lon"]), float(t["lat"]))
-    ax.annotate(t["id"], (px, py), xytext=(5,5), textcoords="offset points", fontsize=7.4,
-                fontweight="bold", color=txt, zorder=6, path_effects=[withStroke(linewidth=2.2, foreground=halo)])
+    label = "%s\n(%s)" % (t["comun"], t["codigo"])
+    ax.annotate(label, (px, py), xytext=(5,4), textcoords="offset points", fontsize=5.6,
+                fontweight="bold", color=txt, zorder=6, ha="left", va="bottom",
+                path_effects=[withStroke(linewidth=1.8, foreground=halo)])
 
 # rótulos de zona
 def zc(lon, lat): return X(lon, lat)

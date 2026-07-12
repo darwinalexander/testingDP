@@ -30,35 +30,35 @@ FONDO SATELITAL (requisito principal):
   al recuadro. Interpolación “lanczos”. Añade el crédito “Esri World Imagery” abajo
   a la derecha, en letra pequeña.
 
-DATOS DE LOS ÁRBOLES (28 registros; columnas: ID, lat, lon, especie, nombre_comun, sitio, veredicto):
-A01, -3.622756, -79.238565, Tecoma stans, Lame negro, Parque, Conservar con intervención
-A02, -3.622770, -79.238523, Melaleuca citrina, Calistemo, Parque, Conservar
-A03, -3.622826, -79.238398, Chionanthus pubescens, Arupo, Parque, Conservar con intervención
-A04, -3.622704, -79.238688, Cupressus sempervirens, Ciprés, Parque, Conservar con intervención
-A05, -3.622641, -79.238656, Hesperocyparis macrocarpa, Ciprés, Parque, Conservar con intervención
-A06, -3.622696, -79.238414, Hesperocyparis macrocarpa, Ciprés, Parque, Derribo
-A07, -3.622588, -79.238773, Cupressus sempervirens, Ciprés, Parque, Conservar con intervención
-A08, -3.622535, -79.238758, Platanus x hispanica, Platanera, Parque, Conservar
-A09, -3.622579, -79.238634, Cupressus sempervirens, Ciprés, Parque, Conservar
-A10, -3.622542, -79.238375, Juglans neotropica, Nogal andino, Parque, Conservar con intervención
-A11, -3.622549, -79.238259, Populus alba, Álamo blanco, Parque, Conservar
-A12, -3.622397, -79.238591, Hesperocyparis macrocarpa, Ciprés, Parque, Conservar con intervención
-A13, -3.622484, -79.238198, Washingtonia filifera, Palma abanico, Parque, Conservar
-A14, -3.622412, -79.238114, Tecoma stans, Lame negro, Parque, Conservar con intervención
-A15, -3.622337, -79.238632, Platanus x hispanica, Platanera, Parque, Conservar
-A16, -3.622259, -79.238614, Jacaranda mimosifolia, Arabisco, Parque, Conservar
-A17, -3.622314, -79.238438, Populus alba, Álamo blanco, Parque, Conservar
-A18, -3.622272, -79.238470, Casuarina equisetifolia, Casuarina, Parque, Conservar con intervención
-A19, -3.622373, -79.238333, Populus alba, Álamo blanco, Parque, Conservar
-A20, -3.622324, -79.238267, Schinus molle, Molle, Parque, Conservar con intervención
-A21, -3.622226, -79.238608, Platanus x hispanica, Platanera, Parque, Conservar con intervención
-A22, -3.622184, -79.238520, Phoenix canariensis, Palma fénix, Parque, Conservar
-A23, -3.622126, -79.238583, Cupressus sempervirens, Ciprés, Parque, Conservar con intervención
-A24, -3.622228, -79.238469, Tecoma stans, Lame negro, Parque, Conservar con intervención
-AV01, -3.622562, -79.237643, Jacaranda mimosifolia, Arabisco, Avenida, Conservar con intervención
-AV02, -3.622533, -79.237688, Schinus molle, Molle, Avenida, Conservar con intervención
-AV03, -3.622606, -79.237574, Jacaranda mimosifolia, Arabisco, Avenida, Conservar con intervención
-AV04, -3.622489, -79.237753, Acacia sp., Acacia, Avenida, Conservar con intervención
+DATOS DE LOS ÁRBOLES (28 registros; columnas: ID, lat, lon, codigo, especie, nombre_comun, sitio, veredicto):
+A01, -3.622756, -79.238565, 67829QG6+VHVQ, Tecoma stans, Lame negro, Parque, Conservar con intervención
+A02, -3.622770, -79.238523, 67829QG6+VHX3, Melaleuca citrina, Calistemo, Parque, Conservar
+A03, -3.622826, -79.238398, 67829QG6+VJ9V, Chionanthus pubescens, Arupo, Parque, Conservar con intervención
+A04, -3.622704, -79.238688, 67829QG6+WG7X, Cupressus sempervirens, Ciprés, Parque, Conservar con intervención
+A05, -3.622641, -79.238656, 67829QG6+WGX6, Hesperocyparis macrocarpa, Ciprés, Parque, Conservar con intervención
+A06, -3.622696, -79.238414, 67829QG6+WJG5, Hesperocyparis macrocarpa, Ciprés, Parque, Derribo
+A07, -3.622588, -79.238773, 67829QG6+XF9F, Cupressus sempervirens, Ciprés, Parque, Conservar con intervención
+A08, -3.622535, -79.238758, 67829QG6+XFQG, Platanus x hispanica, Platanera, Parque, Conservar
+A09, -3.622579, -79.238634, 67829QG6+XG9W, Cupressus sempervirens, Ciprés, Parque, Conservar
+A10, -3.622542, -79.238375, 67829QG6+XJQ9, Juglans neotropica, Nogal andino, Parque, Conservar con intervención
+A11, -3.622549, -79.238259, 67829QG6+XMQ4, Populus alba, Álamo blanco, Parque, Conservar
+A12, -3.622397, -79.238591, 67829QH6+2HV2, Hesperocyparis macrocarpa, Ciprés, Parque, Conservar con intervención
+A13, -3.622484, -79.238198, 67829QH6+2P3P, Washingtonia filifera, Palma abanico, Parque, Conservar
+A14, -3.622412, -79.238114, 67829QH6+2QJF, Tecoma stans, Lame negro, Parque, Conservar con intervención
+A15, -3.622337, -79.238632, 67829QH6+3G9H, Platanus x hispanica, Platanera, Parque, Conservar
+A16, -3.622259, -79.238614, 67829QH6+3HRM, Jacaranda mimosifolia, Arabisco, Parque, Conservar
+A17, -3.622314, -79.238438, 67829QH6+3JFH, Populus alba, Álamo blanco, Parque, Conservar
+A18, -3.622272, -79.238470, 67829QH6+3JR5, Casuarina equisetifolia, Casuarina, Parque, Conservar con intervención
+A19, -3.622373, -79.238333, 67829QH6+3M33, Populus alba, Álamo blanco, Parque, Conservar
+A20, -3.622324, -79.238267, 67829QH6+3MH3, Schinus molle, Molle, Parque, Conservar con intervención
+A21, -3.622226, -79.238608, 67829QH6+4H2W, Platanus x hispanica, Platanera, Parque, Conservar con intervención
+A22, -3.622184, -79.238520, 67829QH6+4HHM, Phoenix canariensis, Palma fénix, Parque, Conservar
+A23, -3.622126, -79.238583, 67829QH6+4HVV, Cupressus sempervirens, Ciprés, Parque, Conservar con intervención
+A24, -3.622228, -79.238469, 67829QH6+4J2X, Tecoma stans, Lame negro, Parque, Conservar con intervención
+AV01, -3.622562, -79.237643, 67829QG6+XWHF, Jacaranda mimosifolia, Arabisco, Avenida, Conservar con intervención
+AV02, -3.622533, -79.237688, 67829QG6+XWMQ, Schinus molle, Molle, Avenida, Conservar con intervención
+AV03, -3.622606, -79.237574, 67829QG6+XX3P, Jacaranda mimosifolia, Arabisco, Avenida, Conservar con intervención
+AV04, -3.622489, -79.237753, 67829QH6+2V5H, Acacia sp., Acacia, Avenida, Conservar con intervención
 
 SIMBOLOGÍA (por veredicto):
 - Derribo → marcador triángulo invertido, color rojo (#E53935). (1 árbol: A06)
@@ -67,8 +67,19 @@ SIMBOLOGÍA (por veredicto):
 - Todos los marcadores con borde blanco, tamaño ~210 pt², z alto.
 
 ETIQUETAS Y ELEMENTOS CARTOGRÁFICOS:
-- Junto a cada marcador, su ID (A01…AV04) en negrita, con halo/contorno para que se
-  lea sobre la foto (texto blanco con contorno negro de ~2 px).
+- Junto a cada marcador, la etiqueta debe mostrar el NOMBRE COMÚN y, entre paréntesis,
+  el CÓDIGO (Plus Code) del árbol. Ejemplo: “Ciprés (67829QG6+WJG5)”.
+  Formato sugerido en dos líneas para que no sea tan largo:
+      Ciprés
+      (67829QG6+WJG5)
+  Texto en negrita, tamaño pequeño (~6.5–7 pt), color blanco con halo/contorno negro
+  de ~2 px para que se lea sobre la foto satelital.
+- Como los 28 árboles están muy juntos, evita el solape: usa un pequeño desplazamiento
+  de la etiqueta respecto al punto y, si es posible, líneas guía (leader lines) finas
+  del punto a su etiqueta, o una técnica de repulsión de textos (p. ej. la librería
+  adjustText). El código Plus Code completo es largo; si aun así se amontona, admite
+  como alternativa mostrar solo los 4 caracteres finales del código, p. ej.
+  “Ciprés (…WJG5)”, manteniendo el nombre común completo.
 - Rótulos de zona: “PARQUE CENTRAL” sobre el grupo A01–A24 y “AVENIDA EL ORO” sobre
   AV01–AV04, en negrita con halo.
 - Flecha de norte (N) arriba a la derecha.
