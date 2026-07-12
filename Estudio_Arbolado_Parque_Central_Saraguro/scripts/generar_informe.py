@@ -150,7 +150,10 @@ P("Nota: el riesgo total integra todos los factores, incluido el daño de raíce
 # ---------- 5 SALUD / ESTADO FITOSANITARIO ----------
 def fito_fill_hex(v): return {"buena":VER_F,"regular":NAR_F,"mala":ROJO_F,"na":PH_F}[D.fito_color_key(v)]
 H("5. Salud y estado fitosanitario del arbolado",1)
-P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) estado fitosanitario de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) presencia de enfermedades; (iii) ubicación de las enfermedades; (iv) presencia de plagas; y (v) ubicación de las plagas. El detalle por árbol se presenta en la ficha de salud (5.5).")
+P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) estado fitosanitario de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) presencia de enfermedades; (iii) ubicación de las enfermedades; (iv) presencia de plagas; y (v) ubicación de las plagas. El detalle por árbol se presenta en la ficha de salud (5.5). La Figura 2 sintetiza, en un «árbol promedio», el estado más frecuente (moda) de cada componente.")
+_pinf=doc.add_paragraph(); _pinf.alignment=WD_ALIGN_PARAGRAPH.CENTER
+_pinf.add_run().add_picture(D.INFOGRAFIA,width=Cm(14.5))
+P("Figura 2. «El árbol promedio de Saraguro»: cada elemento se colorea según el valor más frecuente (moda) de los 40 árboles (verde = bueno, ámbar = regular, rojo = malo, gris = no visible).",size=8.5,italic=True,align="center",color=GRIS,after=8)
 H("5.1. Estado fitosanitario por componente",2)
 tf=doc.add_table(rows=1,cols=5); tf.style="Table Grid"; tf.alignment=WD_TABLE_ALIGNMENT.CENTER
 hdr_row(tf,["Componente","Buena/Bueno","Regular","Mala/Malo","No visible/NA"])

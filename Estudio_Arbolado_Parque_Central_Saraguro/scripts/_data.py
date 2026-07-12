@@ -9,6 +9,7 @@ XLSX = os.path.join(ASSETS, "Reporte_Arboles_40.xlsx")
 LOGO_UNL = os.path.join(ASSETS, "LOGO_UNL.png")
 LOGO_ARBOLEC = os.path.join(ASSETS, "ArbolEC.jpeg")
 MAPA = os.path.join(ASSETS, "mapa_arboles.png")
+INFOGRAFIA = os.path.join(ASSETS, "infografia_arbol_promedio.png")
 
 # Ortofoto opcional de fondo (assets/ortofoto.* + assets/ortofoto_bounds.txt)
 _orto = [f for f in sorted(glob.glob(os.path.join(ASSETS, "ortofoto.*"))) if not f.endswith(".txt")]

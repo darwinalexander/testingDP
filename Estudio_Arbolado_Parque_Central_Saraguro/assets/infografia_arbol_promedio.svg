@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 1620" font-family="Poppins,Segoe UI,Arial">
+<defs>
+ <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+   <stop offset="0" stop-color="#EAF5EC"/><stop offset="1" stop-color="#F7FBF6"/></linearGradient>
+ <radialGradient id="crown" cx="0.42" cy="0.34" r="0.85">
+   <stop offset="0" stop-color="#7CB342"/><stop offset="0.7" stop-color="#2E7D32"/>
+   <stop offset="1" stop-color="#1B5E20"/></radialGradient>
+ <linearGradient id="trunk" x1="0" y1="0" x2="1" y2="0">
+   <stop offset="0" stop-color="#E08E0B"/><stop offset="0.5" stop-color="#F39C12"/>
+   <stop offset="1" stop-color="#E08E0B"/></linearGradient>
+ <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+   <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#204030" flood-opacity="0.18"/></filter>
+</defs>
+<rect width="1240" height="1620" fill="url(#bg)"/>
+<text x="620.0" y="70" text-anchor="middle" font-size="42" font-weight="800" fill="#0E3B2E">EL ÁRBOL PROMEDIO DE SARAGURO</text>
+<text x="620.0" y="108" text-anchor="middle" font-size="22" font-weight="600" fill="#3f6b52">Estado del arbolado urbano según la MODA de 40 árboles · Parque Central y Avenida El Oro · ArboLEC–UNL 2026</text>
+<rect x="240.0" y="114" rx="20" width="760" height="46" fill="#ffffff" stroke="#d6e4da" filter="url(#sh)"/>
+<circle cx="260.0" cy="137" r="11" fill="#2E7D32"/><text x="280.0" y="145" font-size="20" font-weight="600" fill="#243B2E">Buen estado</text>
+<circle cx="445.0" cy="137" r="11" fill="#F39C12"/><text x="465.0" y="145" font-size="20" font-weight="600" fill="#243B2E">Estado regular</text>
+<circle cx="630.0" cy="137" r="11" fill="#E53935"/><text x="650.0" y="145" font-size="20" font-weight="600" fill="#243B2E">Mal estado</text>
+<circle cx="815.0" cy="137" r="11" fill="#9E9E9E"/><text x="835.0" y="145" font-size="20" font-weight="600" fill="#243B2E">No visible</text>
+<ellipse cx="610" cy="1200" rx="330" ry="26" fill="#dfeadf"/>
+<line x1="250" y1="1200" x2="970" y2="1200" stroke="#c2d3c4" stroke-width="3"/>
+<g opacity="0.5"><path d="M 584,1194 Q 550.0,1280.0 460,1360" stroke="#9E9E9E" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="3,12"/><path d="M 584,1194 Q 582.0,1296.0 540,1392" stroke="#9E9E9E" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="3,12"/><path d="M 584,1194 Q 614.0,1300.0 620,1400" stroke="#9E9E9E" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="3,12"/><path d="M 584,1194 Q 646.0,1294.0 700,1388" stroke="#9E9E9E" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="3,12"/><path d="M 584,1194 Q 677.2,1276.0 778,1352" stroke="#9E9E9E" stroke-width="16" fill="none" stroke-linecap="round" stroke-dasharray="3,12"/></g>
+<path d="M 588,705 L 558,1200 L 662,1200 L 632,705 Z" fill="url(#trunk)" stroke="#2E7D32" stroke-width="5"/>
+<path d="M 597.0,720 C 584,900 578.8,1050 576.2,1190" stroke="#2E7D32" stroke-width="2.2" fill="none" opacity="0.55"/>
+<path d="M 607.0,720 C 604,900 602.8,1050 602.2,1190" stroke="#2E7D32" stroke-width="2.2" fill="none" opacity="0.55"/>
+<path d="M 618.0,720 C 626,900 629.2,1050 630.8,1190" stroke="#2E7D32" stroke-width="2.2" fill="none" opacity="0.55"/>
+<path d="M 627.0,720 C 644,900 650.8,1050 654.2,1190" stroke="#2E7D32" stroke-width="2.2" fill="none" opacity="0.55"/>
+<path d="M 582,852 C (540, 816) (505, 776) (490, 742)" stroke="#F39C12" stroke-width="14" fill="none" stroke-linecap="round"/>
+<path d="M 638,852 C (680, 816) (715, 776) (730, 742)" stroke="#F39C12" stroke-width="14" fill="none" stroke-linecap="round"/>
+<path d="M 610,300 C 690,330 760,400 770,485 C 780,575 755,662 700,714 C 665,746 640,766 610,792 C 580,766 555,746 520,714 C 465,662 440,575 450,485 C 460,400 530,330 610,300 Z" fill="url(#crown)" stroke="#2E7D32" stroke-width="6"/>
+<circle cx="670" cy="540" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="539" cy="596" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="622" cy="426" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="712" cy="656" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="409" cy="509" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="812" cy="428" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="582" cy="494" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="700" cy="568" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="488" cy="584" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="681" cy="408" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="671" cy="709" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="402" cy="436" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="879" cy="488" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="576" cy="583" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="597" cy="458" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="711" cy="614" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="442" cy="546" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="754" cy="415" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="600" cy="748" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="433" cy="357" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="669" cy="547" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="531" cy="588" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="639" cy="428" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="694" cy="666" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="415" cy="487" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="828" cy="452" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="589" cy="491" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="695" cy="578" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="482" cy="570" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="700" cy="417" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="645" cy="714" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="420" cy="413" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="885" cy="519" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="569" cy="578" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="610" cy="457" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="699" cy="624" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="443" cy="527" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="772" cy="432" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="568" cy="745" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="462" cy="338" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="668" cy="553" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="525" cy="578" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="655" cy="432" r="5.5" fill="#ffffff" opacity="0.12"/><circle cx="674" cy="675" r="5.5" fill="#ffffff" opacity="0.12"/>
+<circle cx="610" cy="300" r="15" fill="#2E7D32" stroke="#fff" stroke-width="4"/>
+<path d="M 610,260 l 7,20 -14,0 z" fill="#2E7D32"/>
+<path d="M 320,262 L 596,300" stroke="#2E7D32" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/><circle cx="596" cy="300" r="6" fill="#2E7D32"/>
+
+  <g>
+    <rect x="20" y="214" rx="16" ry="16" width="286" height="104" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5" filter="url(#sh)"/>
+    <rect x="20" y="214" rx="16" ry="16" width="12" height="104" fill="#2E7D32"/>
+    <circle cx="60" cy="248" r="13" fill="#2E7D32"/>
+    <text x="84" y="254" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="#243B2E">Cima</text>
+    <text x="42" y="286" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="#2E7D32">Buen estado</text>
+    <text x="286" y="294" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="#243B2E">75%</text>
+    <text x="42" y="309" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">30/40 árboles · punta de copa</text>
+  </g>
+<path d="M 320,470 L 460,470" stroke="#2E7D32" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/><circle cx="460" cy="470" r="6" fill="#2E7D32"/>
+
+  <g>
+    <rect x="20" y="420" rx="16" ry="16" width="286" height="104" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5" filter="url(#sh)"/>
+    <rect x="20" y="420" rx="16" ry="16" width="12" height="104" fill="#2E7D32"/>
+    <circle cx="60" cy="454" r="13" fill="#2E7D32"/>
+    <text x="84" y="460" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="#243B2E">Copa</text>
+    <text x="42" y="492" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="#2E7D32">Simétrica</text>
+    <text x="286" y="500" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="#243B2E">70%</text>
+    <text x="42" y="515" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">28/40 · forma dominante</text>
+  </g>
+<path d="M 320,634 L 540,590" stroke="#2E7D32" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/><circle cx="540" cy="590" r="6" fill="#2E7D32"/>
+
+  <g>
+    <rect x="20" y="590" rx="16" ry="16" width="286" height="104" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5" filter="url(#sh)"/>
+    <rect x="20" y="590" rx="16" ry="16" width="12" height="104" fill="#2E7D32"/>
+    <circle cx="60" cy="624" r="13" fill="#2E7D32"/>
+    <text x="84" y="630" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="#243B2E">Hojas</text>
+    <text x="42" y="662" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="#2E7D32">Buen estado</text>
+    <text x="286" y="670" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="#243B2E">52%</text>
+    <text x="42" y="685" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">21/40 · follaje medio 83%</text>
+  </g>
+<path d="M 920,470 L 706,800" stroke="#F39C12" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/><circle cx="706" cy="800" r="6" fill="#F39C12"/>
+
+  <g>
+    <rect x="934" y="420" rx="16" ry="16" width="286" height="104" fill="#ffffff" stroke="#F39C12" stroke-width="2.5" filter="url(#sh)"/>
+    <rect x="934" y="420" rx="16" ry="16" width="12" height="104" fill="#F39C12"/>
+    <circle cx="974" cy="454" r="13" fill="#F39C12"/>
+    <text x="998" y="460" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="#243B2E">Ramas</text>
+    <text x="956" y="492" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="#F39C12">Estado regular</text>
+    <text x="1200" y="500" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="#243B2E">75%</text>
+    <text x="956" y="515" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">30/40 árboles</text>
+  </g>
+<path d="M 920,770 L 656,900" stroke="#2E7D32" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/><circle cx="656" cy="900" r="6" fill="#2E7D32"/>
+
+  <g>
+    <rect x="934" y="720" rx="16" ry="16" width="286" height="104" fill="#ffffff" stroke="#2E7D32" stroke-width="2.5" filter="url(#sh)"/>
+    <rect x="934" y="720" rx="16" ry="16" width="12" height="104" fill="#2E7D32"/>
+    <circle cx="974" cy="754" r="13" fill="#2E7D32"/>
+    <text x="998" y="760" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="#243B2E">Corteza</text>
+    <text x="956" y="792" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="#2E7D32">Buen estado</text>
+    <text x="1200" y="800" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="#243B2E">60%</text>
+    <text x="956" y="815" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">24/40 árboles</text>
+  </g>
+<path d="M 920,980 L 640,1010" stroke="#F39C12" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/><circle cx="640" cy="1010" r="6" fill="#F39C12"/>
+
+  <g>
+    <rect x="934" y="930" rx="16" ry="16" width="286" height="104" fill="#ffffff" stroke="#F39C12" stroke-width="2.5" filter="url(#sh)"/>
+    <rect x="934" y="930" rx="16" ry="16" width="12" height="104" fill="#F39C12"/>
+    <circle cx="974" cy="964" r="13" fill="#F39C12"/>
+    <text x="998" y="970" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="#243B2E">Fuste</text>
+    <text x="956" y="1002" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="#F39C12">Estado regular</text>
+    <text x="1200" y="1010" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="#243B2E">50%</text>
+    <text x="956" y="1025" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">20/40 · tronco principal</text>
+  </g>
+<path d="M 320,1300 L 540,1360" stroke="#9E9E9E" stroke-width="2.5" fill="none" stroke-dasharray="2,6" stroke-linecap="round"/><circle cx="540" cy="1360" r="6" fill="#9E9E9E"/>
+
+  <g>
+    <rect x="20" y="1250" rx="16" ry="16" width="286" height="104" fill="#ffffff" stroke="#9E9E9E" stroke-width="2.5" filter="url(#sh)"/>
+    <rect x="20" y="1250" rx="16" ry="16" width="12" height="104" fill="#9E9E9E"/>
+    <circle cx="60" cy="1284" r="13" fill="#9E9E9E"/>
+    <text x="84" y="1290" font-family="Poppins,Segoe UI,Arial" font-size="26" font-weight="700" fill="#243B2E">Raíz</text>
+    <text x="42" y="1322" font-family="Poppins,Segoe UI,Arial" font-size="21" font-weight="600" fill="#9E9E9E">No visible</text>
+    <text x="286" y="1330" text-anchor="end" font-family="Poppins,Segoe UI,Arial" font-size="34" font-weight="800" fill="#243B2E">70%</text>
+    <text x="42" y="1345" font-family="Poppins,Segoe UI,Arial" font-size="15.5" fill="#5b6b62">28/40 · no evaluable a simple vista</text>
+  </g>
+<g><rect x="934" y="1170" rx="14" width="286" height="150" fill="#ffffff" stroke="#d6e4da" filter="url(#sh)"/><text x="952" y="1205" font-size="22" font-weight="700" fill="#0E3B2E">Forma intermedia</text><text x="952" y="1236" font-size="16.5" fill="#3f6b52">Conífera + latifoliada:</text><text x="952" y="1262" font-size="16.5" fill="#243B2E">7 coníferas (ápice agudo)</text><text x="952" y="1288" font-size="16.5" fill="#243B2E">33 latifoliadas (copa ancha)</text><text x="952" y="1312" font-size="14.5" fill="#6b7d72">→ silueta combinada</text></g>
+<rect x="30" y="1360" rx="22" width="1180" height="228" fill="#0E3B2E"/>
+<text x="60" y="1404" font-size="24" font-weight="800" fill="#EAF5EC">DATOS PUNTUALES DEL ARBOLADO (n=40)</text>
+<text x="60.0" y="1430" font-size="15.5" font-weight="600" fill="#9cccb0">Altura media</text>
+<text x="60.0" y="1460" font-size="27" font-weight="800" fill="#ffffff">8.5 m</text>
+<text x="60.0" y="1480" font-size="13.5" fill="#7fae94">rango 2,7–27,1</text>
+<text x="288.0" y="1430" font-size="15.5" font-weight="600" fill="#9cccb0">Diámetro medio</text>
+<text x="288.0" y="1460" font-size="27" font-weight="800" fill="#ffffff">42 cm</text>
+<text x="288.0" y="1480" font-size="13.5" fill="#7fae94">rango 1–126</text>
+<text x="516.0" y="1430" font-size="15.5" font-weight="600" fill="#9cccb0">Follaje medio</text>
+<text x="516.0" y="1460" font-size="27" font-weight="800" fill="#ffffff">83%</text>
+<text x="516.0" y="1480" font-size="13.5" fill="#7fae94">densidad de copa</text>
+<text x="744.0" y="1430" font-size="15.5" font-weight="600" fill="#9cccb0">Madurez</text>
+<text x="744.0" y="1460" font-size="27" font-weight="800" fill="#ffffff">Adulto</text>
+<text x="744.0" y="1480" font-size="13.5" fill="#7fae94">80% de los árboles</text>
+<text x="972.0" y="1430" font-size="15.5" font-weight="600" fill="#9cccb0">Porte del fuste</text>
+<text x="972.0" y="1460" font-size="27" font-weight="800" fill="#ffffff">Recto</text>
+<text x="972.0" y="1480" font-size="13.5" fill="#7fae94">40% (moda)</text>
+<text x="60.0" y="1508" font-size="15.5" font-weight="600" fill="#9cccb0">Espacio</text>
+<text x="60.0" y="1538" font-size="27" font-weight="800" fill="#ffffff">Moderado</text>
+<text x="60.0" y="1558" font-size="13.5" fill="#7fae94">62% (moda)</text>
+<text x="288.0" y="1508" font-size="15.5" font-weight="600" fill="#9cccb0">Afección + común</text>
+<text x="288.0" y="1538" font-size="27" font-weight="800" fill="#ffffff">Decoloración</text>
+<text x="288.0" y="1558" font-size="13.5" fill="#7fae94">de hojas · 32%</text>
+<text x="516.0" y="1508" font-size="15.5" font-weight="600" fill="#9cccb0">Agente + común</text>
+<text x="516.0" y="1538" font-size="27" font-weight="800" fill="#ffffff">Epífitas</text>
+<text x="516.0" y="1558" font-size="13.5" fill="#7fae94">62% (líquenes)</text>
+<text x="744.0" y="1508" font-size="15.5" font-weight="600" fill="#9cccb0">Veredicto global</text>
+<text x="744.0" y="1538" font-size="27" font-weight="800" fill="#ffffff">1 derribo</text>
+<text x="744.0" y="1558" font-size="13.5" fill="#7fae94">21 interv. · 18 conservar</text>
+<text x="620.0" y="1606" text-anchor="middle" font-size="15" fill="#6b7d72">Cada elemento refleja el valor más frecuente (moda) entre los 40 árboles inventariados. Semáforo: verde = bueno · ámbar = regular · rojo = malo · gris = no visible.</text>
+</svg>

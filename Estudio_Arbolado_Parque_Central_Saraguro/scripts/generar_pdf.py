@@ -149,8 +149,11 @@ def build_report(path):
     h2s=S("h2",fontName="Helvetica-Bold",fontSize=12,textColor=VERDE,spaceBefore=8,spaceAfter=4)
     FITO_FILL={"buena":VER_F,"regular":NAR_F,"mala":ROJO_F,"na":PH_BG}
     def fito_fill(v): return FITO_FILL[D.fito_color_key(v)]
+    _inf=img_scaled(D.INFOGRAFIA,14.5*cm); _inf.hAlign="CENTER"
     E+=[P("5. Salud y estado fitosanitario del arbolado",h1),
-        P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) <b>estado fitosanitario</b> de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) <b>presencia de enfermedades</b>; (iii) <b>ubicación de las enfermedades</b>; (iv) <b>presencia de plagas</b>; y (v) <b>ubicación de las plagas</b>. El detalle por árbol se presenta en la ficha de salud (5.4)."),
+        P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) <b>estado fitosanitario</b> de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) <b>presencia de enfermedades</b>; (iii) <b>ubicación de las enfermedades</b>; (iv) <b>presencia de plagas</b>; y (v) <b>ubicación de las plagas</b>. El detalle por árbol se presenta en la ficha de salud (5.5). La Figura 2 sintetiza, en un «árbol promedio», el estado más frecuente (moda) de cada componente."),
+        _inf,
+        P("Figura 2. «El árbol promedio de Saraguro»: cada elemento se colorea según el valor más frecuente (moda) de los 40 árboles (verde = bueno, ámbar = regular, rojo = malo, gris = no visible).",S("cap",fontSize=8.5,textColor=GRIS,alignment=TA_CENTER,leading=11)),
         P("5.1. Estado fitosanitario por componente",h2s)]
     fh=[header_cells(["Componente","Buena/Bueno","Regular","Mala/Malo","No visible/NA"])]
     for comp in D.FITO_COMPONENTS:
