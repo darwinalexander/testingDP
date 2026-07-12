@@ -90,6 +90,18 @@ def build_report(path):
         P('Plataforma de consulta pública: <a href="%s" color="blue">%s</a>'%(D.BASE_URL,D.BASE_URL),smallc),
         P("Loja, 11 de julio de 2026",S("x",fontSize=10.5,fontName="Helvetica-Bold",textColor=GRIS,alignment=TA_CENTER)),
         PageBreak()]
+    # RESUMEN GRÁFICO (graphical abstract)
+    _ncon=sum(1 for t in D.trees if t['familia']=='Cupressaceae')
+    _abs=img_scaled(D.INFOGRAFIA,12.6*cm); _abs.hAlign="CENTER"
+    E+=[P("Resumen gráfico",h1),
+        P("El estudio evaluó <b>%d árboles</b> (%d en el Parque Central y %d en la isleta de la Avenida El Oro), de %d especies. La ilustración sintetiza, en un «árbol tipo», el estado sanitario más frecuente (moda) de cada componente: <b>copa, hojas, cima y corteza en buen estado</b>; <b>fuste y ramas en estado regular</b>; y <b>raíz no evaluable a simple vista</b>. El arbolado muestra buena vitalidad general (follaje medio 83 %%), con afecciones de bajo impacto estructural (decoloración foliar y epífitas/líquenes) y pocos casos de deterioro estructural."%(D.n,D.n_parque,D.n_av,len(D.species))),
+        bullets([
+            "<b>Forma dominante intermedia</b>: %d coníferas (ápice agudo) + %d latifoliadas (copa ancha)."%(_ncon, D.n-_ncon),
+            "<b>Seguridad</b>: un único punto crítico de riesgo de caída (árbol A06, propuesto para derribo). Casos estructurales a vigilar: pudrición del tronco (AV02, A25) y raíz comprometida (A07, AV04).",
+            "<b>Veredicto técnico global</b>: 1 derribo · %d conservar con intervención · %d conservar."%(D.n_int,D.n_cons)]),
+        Spacer(1,4), _abs,
+        P("Cada componente se representa con el valor más frecuente (moda) entre los %d árboles; la raíz aparece atenuada por no ser evaluable a simple vista. Semáforo: verde = bueno · ámbar = regular · rojo = malo · gris = no visible."%D.n,S("cap",fontSize=8.5,textColor=GRIS,alignment=TA_CENTER,leading=11)),
+        PageBreak()]
     # 1-2
     E+=[P("1. Antecedentes y justificación",h1),
         P("El Gobierno Autónomo Descentralizado Municipal Intercultural de Saraguro, mediante Oficio Nro. 0286-A-GADMIS del 19 de mayo de 2026, suscrito por el Lic. Segundo Abel Sarango Quizhpe, Alcalde del cantón, solicitó a la Universidad Nacional de Loja el apoyo técnico para la inspección, evaluación y emisión de un criterio especializado sobre el estado actual de los árboles del Parque Central de Saraguro."),
@@ -149,11 +161,8 @@ def build_report(path):
     h2s=S("h2",fontName="Helvetica-Bold",fontSize=12,textColor=VERDE,spaceBefore=8,spaceAfter=4)
     FITO_FILL={"buena":VER_F,"regular":NAR_F,"mala":ROJO_F,"na":PH_BG}
     def fito_fill(v): return FITO_FILL[D.fito_color_key(v)]
-    _inf=img_scaled(D.INFOGRAFIA,14.5*cm); _inf.hAlign="CENTER"
     E+=[P("5. Salud y estado fitosanitario del arbolado",h1),
-        P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) <b>estado fitosanitario</b> de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) <b>presencia de enfermedades</b>; (iii) <b>ubicación de las enfermedades</b>; (iv) <b>presencia de plagas</b>; y (v) <b>ubicación de las plagas</b>. El detalle por árbol se presenta en la ficha de salud (5.5). La Figura 2 sintetiza, en un «árbol promedio», el estado más frecuente (moda) de cada componente."),
-        _inf,
-        P("Figura 2. «El árbol promedio de Saraguro»: cada elemento se colorea según el valor más frecuente (moda) de los 40 árboles (verde = bueno, ámbar = regular, rojo = malo, gris = no visible).",S("cap",fontSize=8.5,textColor=GRIS,alignment=TA_CENTER,leading=11)),
+        P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) <b>estado fitosanitario</b> de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) <b>presencia de enfermedades</b>; (iii) <b>ubicación de las enfermedades</b>; (iv) <b>presencia de plagas</b>; y (v) <b>ubicación de las plagas</b>. El detalle por árbol se presenta en la ficha de salud (5.5); el «árbol tipo» del <b>Resumen gráfico</b> (al inicio del informe) sintetiza el estado más frecuente (moda) de cada componente."),
         P("5.1. Estado fitosanitario por componente",h2s)]
     fh=[header_cells(["Componente","Buena/Bueno","Regular","Mala/Malo","No visible/NA"])]
     for comp in D.FITO_COMPONENTS:

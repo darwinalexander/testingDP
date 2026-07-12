@@ -63,6 +63,9 @@ PASO 5 — SALIDAS (en la carpeta del estudio, un nivel arriba de scripts/)
     Oficio_Respuesta_GAD_Saraguro.pdf                        / .docx
 
 Verifica que:
+- Al inicio (después de la portada) aparece el RESUMEN GRÁFICO: el «árbol tipo» con el
+  semáforo de estado por componente + resumen descriptivo. La imagen ya viene
+  pre-renderizada en `assets/infografia_arbol_promedio.png` (no requiere regenerarse).
 - El mapa de la Sección 3 (Metodología) muestra el fondo satelital con los 40 árboles.
 - La Sección 5 (Salud y estado fitosanitario) tiene sus tablas y la ficha por árbol.
 - La Sección 9 (Registro fotográfico) muestra las fotos reales (no los recuadros

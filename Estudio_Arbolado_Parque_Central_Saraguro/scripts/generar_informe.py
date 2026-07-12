@@ -90,6 +90,18 @@ P("Plataforma de consulta pública: %s"%D.BASE_URL,size=10,align="center",color=
 P("Loja, 11 de julio de 2026",size=10.5,bold=True,align="center",color=GRIS)
 doc.add_page_break()
 
+# ---------- RESUMEN GRÁFICO ----------
+_ncon=sum(1 for t in D.trees if t["familia"]=="Cupressaceae")
+H("Resumen gráfico",1)
+P("El estudio evaluó %d árboles (%d en el Parque Central y %d en la isleta de la Avenida El Oro), de %d especies. La ilustración sintetiza, en un «árbol tipo», el estado sanitario más frecuente (moda) de cada componente: copa, hojas, cima y corteza en buen estado; fuste y ramas en estado regular; y raíz no evaluable a simple vista. El arbolado muestra buena vitalidad general (follaje medio 83 %%), con afecciones de bajo impacto estructural (decoloración foliar y epífitas/líquenes) y pocos casos de deterioro estructural."%(D.n,D.n_parque,D.n_av,len(D.species)))
+bullet("Forma dominante intermedia: %d coníferas (ápice agudo) + %d latifoliadas (copa ancha)."%(_ncon,D.n-_ncon))
+bullet("Seguridad: un único punto crítico de riesgo de caída (árbol A06, propuesto para derribo). Casos estructurales a vigilar: pudrición del tronco (AV02, A25) y raíz comprometida (A07, AV04).")
+bullet("Veredicto técnico global: 1 derribo · %d conservar con intervención · %d conservar."%(D.n_int,D.n_cons))
+_pab=doc.add_paragraph(); _pab.alignment=WD_ALIGN_PARAGRAPH.CENTER
+_pab.add_run().add_picture(D.INFOGRAFIA,width=Cm(13))
+P("Cada componente se representa con el valor más frecuente (moda) entre los %d árboles; la raíz aparece atenuada por no ser evaluable a simple vista. Semáforo: verde = bueno · ámbar = regular · rojo = malo · gris = no visible."%D.n,size=8.5,italic=True,align="center",color=GRIS,after=6)
+doc.add_page_break()
+
 # ---------- 1-2 ----------
 H("1. Antecedentes y justificación",1)
 P("El Gobierno Autónomo Descentralizado Municipal Intercultural de Saraguro, mediante Oficio Nro. 0286-A-GADMIS del 19 de mayo de 2026, suscrito por el Lic. Segundo Abel Sarango Quizhpe, Alcalde del cantón, solicitó a la Universidad Nacional de Loja el apoyo técnico para la inspección, evaluación y emisión de un criterio especializado sobre el estado actual de los árboles del Parque Central de Saraguro.")
@@ -150,10 +162,7 @@ P("Nota: el riesgo total integra todos los factores, incluido el daño de raíce
 # ---------- 5 SALUD / ESTADO FITOSANITARIO ----------
 def fito_fill_hex(v): return {"buena":VER_F,"regular":NAR_F,"mala":ROJO_F,"na":PH_F}[D.fito_color_key(v)]
 H("5. Salud y estado fitosanitario del arbolado",1)
-P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) estado fitosanitario de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) presencia de enfermedades; (iii) ubicación de las enfermedades; (iv) presencia de plagas; y (v) ubicación de las plagas. El detalle por árbol se presenta en la ficha de salud (5.5). La Figura 2 sintetiza, en un «árbol promedio», el estado más frecuente (moda) de cada componente.")
-_pinf=doc.add_paragraph(); _pinf.alignment=WD_ALIGN_PARAGRAPH.CENTER
-_pinf.add_run().add_picture(D.INFOGRAFIA,width=Cm(14.5))
-P("Figura 2. «El árbol promedio de Saraguro»: cada elemento se colorea según el valor más frecuente (moda) de los 40 árboles (verde = bueno, ámbar = regular, rojo = malo, gris = no visible).",size=8.5,italic=True,align="center",color=GRIS,after=8)
+P("Esta sección resume la salud del arbolado a partir de cinco categorías evaluadas en campo: (i) estado fitosanitario de sus componentes (raíz, fuste, corteza, ramas, hojas, cima y copa); (ii) presencia de enfermedades; (iii) ubicación de las enfermedades; (iv) presencia de plagas; y (v) ubicación de las plagas. El detalle por árbol se presenta en la ficha de salud (5.5); el «árbol tipo» del Resumen gráfico (al inicio del informe) sintetiza el estado más frecuente (moda) de cada componente.")
 H("5.1. Estado fitosanitario por componente",2)
 tf=doc.add_table(rows=1,cols=5); tf.style="Table Grid"; tf.alignment=WD_TABLE_ALIGNMENT.CENTER
 hdr_row(tf,["Componente","Buena/Bueno","Regular","Mala/Malo","No visible/NA"])
