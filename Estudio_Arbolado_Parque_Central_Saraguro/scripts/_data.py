@@ -130,6 +130,19 @@ def fnum(v, dec=1):
     try: return ("%.*f" % (dec, float(v))).replace(".", ",")
     except: return str(v)
 
+# Fotos por árbol: assets/fotos/<ID>_1.jpg, <ID>_2.jpg, <ID>_3.jpg (o .png/.jpeg)
+FOTOS_DIR = os.path.join(ASSETS, "fotos")
+def tree_photos(tid):
+    """Devuelve una lista de 3 elementos (ruta de foto o None) para el árbol tid."""
+    out = []
+    for i in (1, 2, 3):
+        hit = None
+        if os.path.isdir(FOTOS_DIR):
+            m = sorted(glob.glob(os.path.join(FOTOS_DIR, "%s_%d.*" % (tid, i))))
+            if m: hit = m[0]
+        out.append(hit)
+    return out
+
 # árbol de derribo (para referencias)
 DERRIBO_TREE = next(t for t in trees if t["cat"]=="DERRIBO")
 

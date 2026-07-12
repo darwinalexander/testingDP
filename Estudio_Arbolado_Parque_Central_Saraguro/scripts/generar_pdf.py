@@ -33,11 +33,23 @@ def bullets(items,st=body):
 def img_scaled(path,width):
     iw,ih=PILImage.open(path).size
     return Image(path,width=width,height=width*ih/iw)
-def photo_strip(labels, h=2.9*cm):
-    cells=[P("<br/>[ %s ]<br/><i>(insertar foto)</i>"%lab, S("ph",fontSize=8,alignment=TA_CENTER,textColor=GRIS,leading=11)) for lab in labels]
-    t=Table([cells],colWidths=[(17.0/len(labels))*cm]*len(labels),rowHeights=[h])
+def cell_image(path, w, h):
+    iw, ih = PILImage.open(path).size
+    sc = min(w/iw, h/ih)
+    return Image(path, width=iw*sc, height=ih*sc)
+def photo_strip(labels, h=2.9*cm, tid=None):
+    photos = D.tree_photos(tid) if tid else [None]*len(labels)
+    cw = (17.0/len(labels))*cm
+    cells=[]
+    for i, lab in enumerate(labels):
+        ph = photos[i] if i < len(photos) else None
+        if ph:
+            cells.append(cell_image(ph, cw-0.2*cm, h-0.2*cm))
+        else:
+            cells.append(P("<br/>[ %s ]<br/><i>(insertar foto)</i>"%lab, S("ph",fontSize=8,alignment=TA_CENTER,textColor=GRIS,leading=11)))
+    t=Table([cells],colWidths=[cw]*len(labels),rowHeights=[h])
     t.setStyle(TableStyle([("BOX",(0,0),(-1,-1),0.5,colors.grey),("INNERGRID",(0,0),(-1,-1),0.5,colors.grey),
-        ("BACKGROUND",(0,0),(-1,-1),PH_BG),("VALIGN",(0,0),(-1,-1),"MIDDLE")]))
+        ("BACKGROUND",(0,0),(-1,-1),PH_BG),("VALIGN",(0,0),(-1,-1),"MIDDLE"),("ALIGN",(0,0),(-1,-1),"CENTER")]))
     return t
 def header_cells(labels):
     return [P(x,S("hh",fontName="Helvetica-Bold",fontSize=8,textColor=colors.white,alignment=TA_CENTER)) for x in labels]
@@ -169,7 +181,7 @@ def build_report(path):
                tb,Spacer(1,3),
                P('<b>Veredicto: <font color="%s">%s.</font></b> %s'%(catcol.hexval(),CAT[t["cat"]],t["fund"]),body),Spacer(1,3),
                P('<b>Ficha del árbol:</b> <a href="%s" color="blue">%s</a>'%(t["url"],t["url"]),S("u",fontSize=8.5,textColor=AZUL,leading=11)),Spacer(1,3),
-               photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]]),Spacer(1,8)]
+               photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],tid=t["id"]),Spacer(1,8)]
         E.append(KeepTogether(block))
     E+=[P("<b>Síntesis de los cipreses:</b> de los %d cipreses se recomienda el derribo de UNO (A06) por riesgo de caída alto y alta exposición; los %d restantes se CONSERVAN con poda sanitaria, manejo de epífitas, tratamiento de daños mecánicos, retiro de clavos/alambres y, en A07, monitoreo prioritario del anclaje."%(len(D.cupres),len(D.cupres)-1)),
         NextPageTemplate("land"),PageBreak()]
@@ -204,7 +216,7 @@ def build_report(path):
                 VERDE.hexval(),t["id"],t["especie"],t["comun"],t["codigo"],t["ref"] or "s/n",fnum(t["lat"],6),fnum(t["lon"],6),
                 fnum(t["d"]),fnum(t["ht"]),t["follaje"],t["riesgo"],fnum(t["valriesgo"],2),RC.get(t["caida"],GRIS).hexval(),t["caida"],
                 catcol.hexval(),CAT[t["cat"]],t["url"],t["url"]),S("info",fontSize=8.5,leading=11.5))
-            E.append(KeepTogether([info,Spacer(1,2),photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],h=2.7*cm),Spacer(1,8)]))
+            E.append(KeepTogether([info,Spacer(1,2),photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],h=2.7*cm,tid=t["id"]),Spacer(1,8)]))
     # 9 CONCLUSIONES
     E+=[PageBreak(),P("9. Conclusiones y recomendaciones",h1),
         P("Conclusiones:",S("b",fontName="Helvetica-Bold",fontSize=10.5)),

@@ -46,13 +46,21 @@ def bullet(text,size=10.5):
 def hdr_row(table,labels):
     for i,lab in enumerate(labels):
         ctext(table.rows[0].cells[i],lab,bold=True,white=True,size=8.5,align="center"); set_bg(table.rows[0].cells[i],VERDE_H)
-def photo_strip(labels,height=2.9):
+def photo_strip(labels,height=2.9,tid=None):
+    photos=D.tree_photos(tid) if tid else [None]*len(labels)
     t=doc.add_table(rows=1,cols=len(labels)); t.alignment=WD_TABLE_ALIGNMENT.CENTER
-    t.rows[0].height=Cm(height)
+    t.rows[0].height=Cm(height); cw=Cm(17.0/len(labels))
     for i,lab in enumerate(labels):
-        c=t.rows[0].cells[i]; set_bg(c,PH_F); c.width=Cm(17.0/len(labels))
+        c=t.rows[0].cells[i]; c.width=cw
         c.text=""; p=c.paragraphs[0]; p.alignment=WD_ALIGN_PARAGRAPH.CENTER
-        r=p.add_run("\n[ %s ]\n(insertar foto)\n"%lab); r.font.size=Pt(8.5); r.font.color.rgb=GRIS; r.italic=True
+        ph=photos[i] if i<len(photos) else None
+        if ph:
+            try:
+                p.add_run().add_picture(ph,width=Cm(17.0/len(labels)-0.3))
+            except Exception:
+                set_bg(c,PH_F); p.add_run("\n[ %s ]\n(insertar foto)\n"%lab).font.size=Pt(8.5)
+        else:
+            set_bg(c,PH_F); r=p.add_run("\n[ %s ]\n(insertar foto)\n"%lab); r.font.size=Pt(8.5); r.font.color.rgb=GRIS; r.italic=True
     return t
 def url_par(t):
     p=doc.add_paragraph(); r=p.add_run("Ficha del árbol: "); r.bold=True; r.font.size=Pt(8.5)
@@ -174,7 +182,7 @@ for t in D.cupres:
     rc.font.color.rgb=(ROJO if t["cat"]=="DERRIBO" else (NARANJA if t["cat"]=="CONSERVAR-INT" else VERDE))
     rf=pv.add_run(t["fund"]); rf.font.size=Pt(10); pv.paragraph_format.space_after=Pt(3)
     url_par(t)
-    photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]])
+    photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],tid=t["id"])
     P("",after=4)
 P("Síntesis de los cipreses: de los %d cipreses se recomienda el derribo de UNO (A06) por riesgo de caída alto y alta exposición; los %d restantes se CONSERVAN con poda sanitaria, manejo de epífitas, tratamiento de daños mecánicos, retiro de clavos/alambres y, en A07, monitoreo prioritario del anclaje."%(len(D.cupres),len(D.cupres)-1),after=8)
 
@@ -218,7 +226,7 @@ for grp_label,grp in [("PARQUE CENTRAL",D.parque),("AVENIDA EL ORO (fuera del pa
         r6=p.add_run("Ficha del árbol: "); r6.bold=True; r6.font.size=Pt(8.5)
         r7=p.add_run(t["url"]); r7.font.size=Pt(8.5); r7.font.color.rgb=AZUL
         p.paragraph_format.space_after=Pt(2)
-        photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],height=2.7)
+        photo_strip(["Foto 1 — %s"%t["id"],"Foto 2 — %s"%t["id"],"Foto 3 — %s"%t["id"]],height=2.7,tid=t["id"])
         P("",after=4)
 
 # ---------- 9 CONCLUSIONES ----------
